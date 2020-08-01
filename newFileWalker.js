@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const dPath = require('path');
+const { clear } = require('console');
 
 const LIST = 1;
 // module.exports.LIST = LIST;
@@ -98,7 +99,7 @@ async function myReaddir(path, settings, deep) {
               let folderPath = pathArr.slice(rootIdx + 1).join('/');
               // format root path from './' to '/', or add '/' at beginning
               if (folderPath === './') folderPath = '/';
-              else folderPath = `/${folderPath};`
+              else folderPath = `/${folderPath};`;
               // create object for each path
               const obj = {
                 name: files[i],
@@ -375,11 +376,13 @@ async function list(path, options, progress) {
   }
 }
 
+// create a function list
+
 async function generateResult(dirPath) {
   const options = {
     mode: LIST,
     recursive: true,
-    stats: false,
+    stats: true,
     ignoreFolders: true,
     extensions: false,
     deep: false,
@@ -395,7 +398,6 @@ async function generateResult(dirPath) {
   else console.log(listFiles);
 }
 
-// console.clear(process.stdout.write('\033c'));
 process.stdout.write('\033c');
 
 const sourceFoldr = './';
