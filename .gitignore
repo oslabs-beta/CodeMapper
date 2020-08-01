@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+# VS Code Project Files, and Mac Specific .DS_store
+.vscode
+.DS_Store
