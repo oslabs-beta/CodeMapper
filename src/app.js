@@ -10,14 +10,14 @@ window.addEventListener('load', () => {
       dataObject: treeMap,
       groupBorderRadius: 0,
     });
+
+    foamtree.set({
+      rainbowStartColor: '#f00',
+      rainbowEndColor: '#aa0',
+      groupBorderRadius: 0,
+    });
+    foamtree.redraw();
   } else {
     console.log('Unsupported brower for FoamTree visualizations');
   }
-
-  foamtree.set({
-    rainbowStartColor: '#f00',
-    rainbowEndColor: '#aa0',
-    groupBorderRadius: 0,
-  });
-  foamtree.redraw();
 });
