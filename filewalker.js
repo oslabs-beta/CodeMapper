@@ -39,12 +39,12 @@ async function readFile(file, encoding) {
     let encode;
 
     if (encoding) {
-      encode = { encoding: encoding };
+      encode = { encoding };
     } else {
       encode = {};
     }
 
-    fs.readFile(file, encode, (err, data) => {
+    fs.readFileSync(file, encode, (err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -156,7 +156,7 @@ async function processOneLevel(path, settings, progress, depth = 0) {
 
   function onlyInclude() {
     function exists(fullname) {
-      for (let j = 0; j < settings.include.length; j++) {
+      for (let j = 0; j < settings.include.length; j += 1) {
         if (fullname.indexOf(settings.include[j]) > -1) {
           return true;
         }
@@ -166,7 +166,7 @@ async function processOneLevel(path, settings, progress, depth = 0) {
 
     if (settings.include.length > 0) {
       for (let i = filesList.length - 1; i > -1; i--) {
-        let item = filesList[i];
+        const item = filesList[i];
 
         if (settings.mode === TREE && item.isDirectory && item.content) continue;
 
@@ -200,48 +200,55 @@ async function statDir(list, settings, progress, depth) {
     } catch (err) {
       list[i].error = err;
     }
+
     if (
-      (list[i].isDirectory &&
-        settings.ignoreFolders &&
-        !list[i].content &&
-        list[i].error === undefined) ||
-      !isOk
+      (
+        list[i].isDirectory
+        && settings.ignoreFolders
+        && !list[i].content
+        && list[i].error === undefined
+      )
+      || !isOk
     ) {
       list.splice(i, 1);
     }
   }
+
   return list;
 }
-/**
- * Returns an object with updated item information
- * @param {object} list items list
- * @param {number} i index of item
- * @param {object} settings the options to use
- * @param {function} progress callback progress
- * @param {number} depth folder depth
- * @returns {object[]} array with file information
- * @private
- */
+
+// Returns an object with updated item information
 async function statDirItem(list, i, settings, progress, depth) {
   const stats = await stat(list[i].fullname);
   list[i].isDirectory = stats.isDirectory();
+
+  // add the stats if the stats option is set to true
   if (settings.stats) {
     list[i].stats = stats;
   }
+
+  // just add size if size option is set to true
+  if (settings.size) {
+    list[i].size = stats.size;
+  }
+
+  // if read content is set to true and this is a file...
   if (settings.readContent && !list[i].isDirectory) {
+    // read the file with the encoding setting and save it in the data property
     list[i].data = await readFile(list[i].fullname, settings.encoding);
   }
+
+  // if this is a directory and recursive is true...
   if (list[i].isDirectory && settings.recursive) {
+    // if we just want a flat list of the file info, concatenate this layer to the list
     if (settings.mode === LIST) {
-      list = list.concat(
-        await processOneLevel(list[i].fullname, settings, progress, depth + 1)
-      );
+      list = list.concat(await processOneLevel(list[i].fullname, settings, progress, depth + 1));
     } else {
       list[i].content = await processOneLevel(
         list[i].fullname,
         settings,
         progress,
-        depth + 1
+        depth + 1,
       );
       if (list[i].content.length === 0) {
         list[i].content = null;
@@ -282,6 +289,7 @@ async function list(path, options, progress) {
     mode: LIST,
     recursive: true,
     stats: false,
+    size: false,
     ignoreFolders: true,
     extensions: false,
     depth: false,
@@ -320,6 +328,9 @@ async function list(path, options, progress) {
       if (options.stats !== undefined) {
         settings.stats = options.stats;
       }
+      if (options.size !== undefined) {
+        settings.size = options.size;
+      }
       if (options.ignoreFolders !== undefined) {
         settings.ignoreFolders = options.ignoreFolders;
       }
@@ -351,38 +362,4 @@ async function list(path, options, progress) {
   }
 }
 
-// This is our internal function to actually run the filewalker with all the options passed in.
-// The above filewalker functionality is adapted from recursive-readdir-async repo/npm library
-// More details on the options passed in here can be found in that documentation until we add our own
-async function generateResult(dirPath) {
-  const options = {
-    mode: TREE,
-    recursive: true,
-    stats: true,
-    ignoreFolders: true,
-    extensions: true,
-    depth: true,
-    realPath: true,
-    normalizePath: true,
-    include: [],
-    exclude: ['node_modules', '.git'],
-    readContent: false,
-    encoding: 'base64',
-}
-  // We want to pass in the path first. After that we can pass in options (defined above) if we want, or we can put a callback as the second argument.
-  // If we want options and a callback, we can pass in the callback as the third argument, with the second argument as the options object
-  // The callback can have three parameters - object, index, and total
-  // Index is the item number for the item in the specific folder that we're looking at
-  // Object is the object with the details about the file
-  // Total is how many files are in the folder
-  // It seems like we can use properties like object.path in our callback because all properties are accessible once the object is available
-  const listFiles = await list(dirPath, options, (obj, index, total) => {
-    console.log(`${index} of ${total} ${obj.path}`);
-  });
-
-  if (listFiles.error) console.error(listFiles.error);
-  
-  // else console.log(JSON.stringify(listFiles));
-}
-
-generateResult('../../HackHours/');
+module.exports = { list };
