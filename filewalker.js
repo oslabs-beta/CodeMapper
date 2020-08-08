@@ -30,7 +30,6 @@ async function stat(file) {
 // module.exports.stat = stat;
 
 async function readFile(file, encoding) {
-
   if (encoding === undefined) {
     encoding = 'base64';
   }
@@ -39,7 +38,7 @@ async function readFile(file, encoding) {
     let encode;
 
     if (encoding) {
-      encode = { encoding: encoding };
+      encode = { encoding };
     } else {
       encode = {};
     }
@@ -140,16 +139,16 @@ async function processOneLevel(path, settings, progress, depth = 0) {
   try {
     filesList = await generateOneLevel(path, settings, depth);
   } catch (err) {
-    return { error: err, path: path };
+    return { error: err, path };
   }
 
   // If we want to recurse into another layer...
   if (
-    settings.stats ||
-    settings.recursive ||
-    !settings.ignoreFolders ||
-    settings.readContent ||
-    settings.mode === TREE
+    settings.stats
+    || settings.recursive
+    || !settings.ignoreFolders
+    || settings.readContent
+    || settings.mode === TREE
   ) {
     filesList = await statDir(filesList, settings, progress, depth);
   }
@@ -201,11 +200,11 @@ async function statDir(list, settings, progress, depth) {
       list[i].error = err;
     }
     if (
-      (list[i].isDirectory &&
-        settings.ignoreFolders &&
-        !list[i].content &&
-        list[i].error === undefined) ||
-      !isOk
+      (list[i].isDirectory
+        && settings.ignoreFolders
+        && !list[i].content
+        && list[i].error === undefined)
+      || !isOk
     ) {
       list.splice(i, 1);
     }
@@ -234,14 +233,14 @@ async function statDirItem(list, i, settings, progress, depth) {
   if (list[i].isDirectory && settings.recursive) {
     if (settings.mode === LIST) {
       list = list.concat(
-        await processOneLevel(list[i].fullname, settings, progress, depth + 1)
+        await processOneLevel(list[i].fullname, settings, progress, depth + 1),
       );
     } else {
       list[i].content = await processOneLevel(
         list[i].fullname,
         settings,
         progress,
-        depth + 1
+        depth + 1,
       );
       if (list[i].content.length === 0) {
         list[i].content = null;
@@ -368,7 +367,7 @@ async function generateResult(dirPath) {
     exclude: ['node_modules', '.git'],
     readContent: false,
     encoding: 'base64',
-}
+  };
   // We want to pass in the path first. After that we can pass in options (defined above) if we want, or we can put a callback as the second argument.
   // If we want options and a callback, we can pass in the callback as the third argument, with the second argument as the options object
   // The callback can have three parameters - object, index, and total
@@ -381,8 +380,8 @@ async function generateResult(dirPath) {
   });
 
   if (listFiles.error) console.error(listFiles.error);
-  
+
   // else console.log(JSON.stringify(listFiles));
 }
 
-generateResult('../../HackHours/');
+module.exports.generateResult = generateResult;
