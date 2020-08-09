@@ -9,7 +9,7 @@ const LIST = 1;
 // module.exports.LIST = LIST;
 
 const TREE = 2;
-// module.exports.TREE = TREE;
+module.exports.TREE = TREE;
 
 /*
  * Variables
@@ -353,21 +353,7 @@ async function list(path, options, progress) {
 // This is our internal function to actually run the filewalker with all the options passed in.
 // The above filewalker functionality is adapted from recursive-readdir-async repo/npm library
 // More details on the options passed in here can be found in that documentation until we add our own
-async function generateResult(dirPath) {
-  const options = {
-    mode: TREE,
-    recursive: true,
-    stats: true,
-    ignoreFolders: true,
-    extensions: true,
-    depth: true,
-    realPath: true,
-    normalizePath: true,
-    include: [],
-    exclude: ['node_modules', '.git'],
-    readContent: false,
-    encoding: 'base64',
-  };
+async function generateResult(dirPath, options) {
   // We want to pass in the path first. After that we can pass in options (defined above) if we want, or we can put a callback as the second argument.
   // If we want options and a callback, we can pass in the callback as the third argument, with the second argument as the options object
   // The callback can have three parameters - object, index, and total
@@ -376,12 +362,21 @@ async function generateResult(dirPath) {
   // Total is how many files are in the folder
   // It seems like we can use properties like object.path in our callback because all properties are accessible once the object is available
   const listFiles = await list(dirPath, options, (obj, index, total) => {
-    console.log(`${index} of ${total} ${obj.path}`);
+    // console.log(`${index} of ${total} ${obj.path}`);
   });
 
   if (listFiles.error) console.error(listFiles.error);
+  else {
+    // create a data file if it doesn't exist
+    const dataFile = './data';
+    if (!fs.existsSync(dataFile)) fs.mkdirSync(dataFile);
+    fs.writeFile('./data/foamtreeData.js', `module.exports = ${JSON.stringify(listFiles, null, 2)};\n`, err => {
+      if (err) console.error(`Error writing ${err}`);
+      console.log(JSON.stringify(listFiles, null, 2));
 
-  // else console.log(JSON.stringify(listFiles));
+      process.exit();
+    });
+  }
 }
 
-generateResult('../../HackHours/');
+module.exports.generateResult = generateResult;
