@@ -1,5 +1,5 @@
 const readline = require('readline');
-const { TREE, generateResult } = require('./projectMapper');
+const { generateTree } = require('./generateFileTree');
 
 const rl = readline.createInterface({
   input: process.stdin,
