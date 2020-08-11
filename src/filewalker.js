@@ -88,6 +88,7 @@ async function generateOneLevel(path, settings, depth) {
       // Asynchronously computes the canonical pathname by resolving ".", "..", and symbolic links.
       fs.realpath(path, (err, rpath) => {
         if (err || settings.realPath === false) {
+          console.log('rpath =', rpath);
           rpath = path;
         }
 
