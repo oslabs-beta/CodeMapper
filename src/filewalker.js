@@ -88,6 +88,7 @@ async function generateOneLevel(path, settings, depth) {
       // Asynchronously computes the canonical pathname by resolving ".", "..", and symbolic links.
       fs.realpath(path, (err, rpath) => {
         if (err || settings.realPath === false) {
+          console.log('rpath =', rpath);
           rpath = path;
         }
 
@@ -201,11 +202,13 @@ async function statDir(list, settings, progress, depth) {
     }
 
     if (
+      (
         list[i].isDirectory
         && settings.ignoreFolders
         && !list[i].content
         && list[i].error === undefined
-        || !isOk
+      )
+      || !isOk
     ) {
       list.splice(i, 1);
     }
@@ -360,4 +363,3 @@ async function list(path, options, progress) {
 }
 
 module.exports = { list };
-
