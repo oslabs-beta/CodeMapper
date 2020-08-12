@@ -9,7 +9,17 @@ const rl = readline.createInterface({
 
 // include and exclude arrays that the user can input to and that are passed as parameters to the generateTree function
 const includeArr = [];
-const excludeArr = ['node_modules', 'LICENSE', '.git', '.DS_Store', '.vscode', 'package.json', '-lock.json', '.lock', '.md'];
+const excludeArr = [
+  'node_modules',
+  'LICENSE',
+  '.git',
+  '.DS_Store',
+  '.vscode',
+  'package.json',
+  'package-lock.json',
+  'yarn.lock',
+  '.md'
+];
 
 // set root path, I feel this could be another option given to the user but a default of root can be set if no value is input or input is invalid
 let rootDir = PATH.resolve(__dirname, '../');
@@ -18,6 +28,8 @@ let rootDir = PATH.resolve(__dirname, '../');
 // Function creates REPL to push files and folders to options include array
 function addToInclude() {
   rl.question('Add to include in mapping, or \'m\' to map: ', userInput => {
+    userInput = userInput.trim();
+
     if (userInput === 'q') process.exit();
     if (userInput === 'm') {
       rl.close();
@@ -31,6 +43,8 @@ function addToInclude() {
 // Function creates REPL to push files and folders to options exclude array
 function addToExclude() {
   rl.question('Add to exclude from mapping, or \'m\' to map: ', input => {
+    input = input.trim();
+
     if (input === 'q') process.exit();
     if (input === 'm') {
       rl.close();
@@ -44,6 +58,8 @@ function addToExclude() {
 function getUserChoices() {
   const message = '\nPlease type \'i\' to choose the include option, or type \'e\' for the exclude option: ';
   rl.question(message, userInput => {
+    userInput = userInput.trim();
+
     if (userInput === 'q') process.exit();
     if (userInput.toLowerCase() === 'i') addToInclude();
     if (userInput.toLowerCase() === 'e') addToExclude();
@@ -56,9 +72,12 @@ function rootDirOption() {
   // need to come up with a general path validation pattern test using regex
   const message = 'You can set a root directory to start the mapping process, or just hit return \nto stick with the default as this folder\'s root path: ';
   rl.question(message, userInput => {
+    userInput = userInput.trim();
+
     if (userInput === 'q') process.exit();
     if (userInput.length > 0) {
-      rootDir = PATH.resolve(__dirname, userInput);
+      // rootDir = PATH.resolve(__dirname, userInput);
+      rootDir = userInput;
       return getUserChoices();
     }
     if (userInput === '') {
@@ -86,6 +105,9 @@ Type 'q' to exit the program.
 
 // Ask if user wants to clear their console before proceeding
 rl.question('If you like to clear the console before proceeding, enter \'c\': ', userInput => {
+  userInput = userInput.trim();
+
+  if (userInput === 'q') return process.exit();
   if (userInput.toLowerCase() === 'c') process.stdout.write('\033c');
 
   console.log(greeting);
