@@ -1,5 +1,6 @@
 // temporary, for seeing the output
 const fs = require('fs');
+const PATH = require('path');
 const { generateTree } = require('./generateFileTree');
 // const createStructureResult = require('./createStructureResult');
 const { filterAndParse } = require('./filterAndParse');
@@ -12,7 +13,8 @@ async function flow() {
 
 
   // this will be set by the user later. setting it manually for now
-  const root = './';
+  const root = PATH.resolve(__dirname, './');
+  console.log('flow.js root =', root);
   const include = [];
   const exclude = ['node_modules', '.git', 'testfiles', '.vscode'];
 
