@@ -48,7 +48,7 @@ async function generateTree(rootPath, include = [], exclude = []) {
     console.error(fileTree.error);
   } else {
     // otherwise, write the file to fileTree.json with basic formatting (temporary for dev use)
-    fs.writeFileSync('fileTree.json', JSON.stringify(fileTree, null, 2));
+    fs.writeFileSync('data/fileTree.json', JSON.stringify(fileTree, null, 2));
     // and return the filetree
     return fileTree;
   }
