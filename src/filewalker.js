@@ -30,7 +30,6 @@ async function stat(file) {
 // module.exports.stat = stat;
 
 async function readFile(file, encoding) {
-
   if (encoding === undefined) {
     encoding = 'base64';
   }
@@ -89,6 +88,7 @@ async function generateOneLevel(path, settings, depth) {
       // Asynchronously computes the canonical pathname by resolving ".", "..", and symbolic links.
       fs.realpath(path, (err, rpath) => {
         if (err || settings.realPath === false) {
+          // console.log('rpath =', rpath);
           rpath = path;
         }
 
@@ -140,16 +140,16 @@ async function processOneLevel(path, settings, progress, depth = 0) {
   try {
     filesList = await generateOneLevel(path, settings, depth);
   } catch (err) {
-    return { error: err, path: path };
+    return { error: err, path };
   }
 
   // If we want to recurse into another layer...
   if (
-    settings.stats ||
-    settings.recursive ||
-    !settings.ignoreFolders ||
-    settings.readContent ||
-    settings.mode === TREE
+    settings.stats
+    || settings.recursive
+    || !settings.ignoreFolders
+    || settings.readContent
+    || settings.mode === TREE
   ) {
     filesList = await statDir(filesList, settings, progress, depth);
   }

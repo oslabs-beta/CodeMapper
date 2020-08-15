@@ -6,7 +6,7 @@ const fs = require('fs');
 const { transform } = require('./transform');
 
 // this function is only for dev and can be removed for production
-const createAST = (filePath) => {
+const createAST = filePath => {
   // this gets used by transformSync to generate our AST (only used in dev)
   const source = fs.readFileSync(filePath, 'utf8');
 
@@ -18,7 +18,7 @@ const createAST = (filePath) => {
   });
 
   // write the ast to a file (temporary)
-  fs.writeFileSync('data/data.json', JSON.stringify(ast, null, 2));
+  fs.writeFileSync('../data/data.json', JSON.stringify(ast, null, 2));
 };
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
@@ -164,7 +164,7 @@ const fileParser = (fileObject, filePath) => {
 
 // this is just an easy wrapper for calling both of the above functions.
 // later we can just export the fileParser and delete all the AST stuff
-const parser = (fileObject) => {
+const parser = fileObject => {
   const filePath = fileObject.fullname;
   createAST(filePath);
   fileParser(fileObject, filePath);
