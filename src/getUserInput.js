@@ -18,7 +18,7 @@ const excludeArr = [
   'package.json',
   'package-lock.json',
   'yarn.lock',
-  '.md'
+  '.md',
 ];
 
 // set root path, I feel this could be another option given to the user but a default of root can be set if no value is input or input is invalid
