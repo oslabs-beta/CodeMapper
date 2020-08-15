@@ -14,7 +14,7 @@ async function flow() {
   // this will be set by the user later. setting it manually for now
   const root = './';
   const include = [];
-  const exclude = ['node_modules', '.git', 'testfiles', '.vscode'];
+  const exclude = ['node_modules', '.git', '.vscode', 'testfiles', 'data'];
 
   // call generateTree with the root path passed in
   const fileTree = await generateTree(root, include, exclude);
@@ -26,7 +26,7 @@ async function flow() {
     // call filter, passing in the file tree, to get an array of pointers to the JS file objects
     // this will also pass all the js files to the parser
   filterAndParse(fileTree);
-  fs.writeFileSync('testfiles/finalTree.json', JSON.stringify(fileTree));
+  fs.writeFileSync('data/finalTree.json', JSON.stringify(fileTree, null, 2));
   console.log('All done! look in testfiles/finalTree.json to see the current result.');
 
   // our original fileTree should now be modified to give us what we need for generating other results
