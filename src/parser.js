@@ -1,6 +1,7 @@
 const { parse } = require('@babel/parser');
 const babel = require('@babel/core');
 const traverse = require('@babel/traverse').default;
+const generate = require('@babel/generator').default;
 const fs = require('fs');
 const { transform } = require('./transform');
 
@@ -17,7 +18,7 @@ const createAST = filePath => {
   });
 
   // write the ast to a file (temporary)
-  fs.writeFileSync('testfiles/data.json', JSON.stringify(ast, null, 2));
+  fs.writeFileSync('../data/data.json', JSON.stringify(ast, null, 2));
 };
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
@@ -28,6 +29,10 @@ const fileParser = (fileObject, filePath) => {
   // this parses the file into an AST so we can traverse it
   const parsedFile = parse(readFile, {
     sourceType: 'module',
+    plugins: [
+      'jsx',
+      'typescript',
+    ],
   });
 
   // this allows us to traverse the AST
@@ -36,12 +41,117 @@ const fileParser = (fileObject, filePath) => {
     // into what we need for visualization and other types of sharing results
     // and save that info into our fileTree
 
-    // This is a simple example
-    Function(path) {
-      // it currently saves each function to a file
-      // we need to rewrite it to save the info we need as a property on the object
-      // for the file we're currently looking at
-      transform.function(path, fileObject);
+    // This is for regular function expressions (not anonymous/arrow functions)
+    FunctionDeclaration({ node }) {
+      const name = node.id.name;
+      const params = node.params;
+      const async = node.async;
+      const type = node.type;
+      const method = false;
+      const definition = generate(node).code;
+
+      transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+    },
+
+    // This handles the arrow functions
+    VariableDeclaration({ node }) {
+      if (node.declarations[0].init && node.declarations[0].init.type === 'ArrowFunctionExpression') {
+        const name = node.declarations[0].id.name;
+        const params = node.declarations[0].init.params || [];
+        const async = node.declarations[0].init.async;
+        const type = node.declarations[0].init.type;
+        const method = false;
+        const definition = generate(node).code;
+        transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+      }
+    },
+
+    // This handles class methods
+    ExpressionStatement({ node }) {
+      if (node.expression.right && node.expression.left) {
+        const type = node.expression.right.type;
+        if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') {
+          const name = `${node.expression.left.object.name}.${node.expression.left.property.name}` || 'anonymousMethod';
+          const params = node.expression.right.params || [];
+          const async = node.expression.right.async;
+          const method = true;
+          const definition = generate(node).code;
+          transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+        }
+      }
+
+      // This handles functions' inner function calls
+      // if (node.expression === 'CallExpression') {
+      // }
+    },
+
+    // This handles functions that are defined inside of iffys
+    FunctionExpression(path) {
+      const { node } = path;
+      // ignore any that are assignment expressions because they are handled in the above Expression Statement block
+      if (path.parent.type !== 'AssignmentExpression') {
+        let name;
+        if (node.id) {
+          name = node.id.name;
+        } else {
+          name = 'anonymousFunction';
+        }
+        const params = node.params || [];
+        const async = node.async;
+        const type = node.type;
+        const method = false;
+        const definition = generate(node).code;
+        transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+      }
+    },
+
+    // for outer function calls
+    CallExpression(path) {
+      // destructuring node from the path
+      const { node } = path;
+
+      let name;
+      let type;
+      // we'll grab the name of the function being called
+      // for regular functions
+      if (node.callee && node.callee.name) {
+        name = node.callee.name;
+        type = 'function';
+      } else if (node.callee.object && node.callee.object.name) {
+        // for regular class methods
+        name = `${node.callee.object.name}.${node.callee.property.name}`;
+        type = 'method';
+      } else if (node.callee.object.object && node.callee.object.property && node.callee.object.object.name && node.callee.object.property.name) {
+        // for methods called on object properties
+        name = `${node.callee.object.object.name}.${node.callee.object.property.name}.${node.callee.property.name}`;
+        type = 'method';
+      } else if (node.callee.property && node.callee.property.name) {
+        // and for class/prototype methods we can't identify the object of
+        name = `anonymous.${node.callee.property.name}`;
+        type = 'anonymous method';
+      } else if (node.callee && node.callee.id && node.callee.id.name) {
+        name = node.callee.id.name;
+        type = 'immediately invoked function expression';
+      } else {
+        name = 'anonymous';
+        type = 'anonymous function';
+      }
+      // grab the arguments (this will be an empty array if no arguments are there)
+      const args = node.arguments;
+
+      transform.functionCall(fileObject, name, type, args);
+
+      // or if object type is call expression, then it's in a chain of methods, so we won't have the object name but we still get the method name
+      // arguments are always at path.node.arguments
+
+      // check the parent to see if it is program.body (something like that)
+      // if it is, then it's an outer function call so we can process it here
+      // console.log(path.contexts[0].scope.block.body);
+
+      // // define a function that can look inside a call expression for more call expressions
+      // if (path.parent.type === 'MemberExpression') {
+      //   console.log(`path.parent.type is MemberExpression for the node: ${JSON.stringify(path.node)}`);
+      // }
     },
   };
 
