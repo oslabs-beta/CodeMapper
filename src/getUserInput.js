@@ -13,6 +13,7 @@ const excludeArr = [
   'node_modules',
   'LICENSE',
   '.git',
+  '.babelrc',
   '.DS_Store',
   '.vscode',
   'package.json',

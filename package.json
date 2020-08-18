@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BeckettH/CodeMapper.git"
+    "url": "git+https://github.com/oslabs-beta/CodeMapper.git"
   },
   "author": "RabbitHole",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/BeckettH/CodeMapper/issues"
+    "url": "https://github.com/oslabs-beta/CodeMapper/issues"
   },
-  "homepage": "https://github.com/BeckettH/CodeMapper#readme",
+  "homepage": "https://github.com/oslabs-beta/CodeMapper#readme",
   "dependencies": {
     "@babel/core": "^7.11.0",
     "@babel/generator": "^7.11.0",

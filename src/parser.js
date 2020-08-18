@@ -3,6 +3,7 @@ const babel = require('@babel/core');
 const traverse = require('@babel/traverse').default;
 const generate = require('@babel/generator').default;
 const fs = require('fs');
+const PATH = require('path');
 const { transform } = require('./transform');
 
 // this function is only for dev and can be removed for production
@@ -18,7 +19,14 @@ const createAST = filePath => {
   });
 
   // write the ast to a file (temporary)
-  fs.writeFileSync('../data/data.json', JSON.stringify(ast, null, 2));
+  // incase there isn't a data folder present create one to prevent app from running
+  let data = '../data';
+
+  if (!fs.existsSync(data)) {
+    fs.mkdirSync(data);
+  }
+  fs.writeFileSync(PATH.resolve(__dirname, '../data/data.json'), JSON.stringify(ast, null, 2));
+  console.log(JSON.stringify(ast, null, 2));
 };
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
@@ -43,10 +51,10 @@ const fileParser = (fileObject, filePath) => {
 
     // This is for regular function expressions (not anonymous/arrow functions)
     FunctionDeclaration({ node }) {
-      const name = node.id.name;
-      const params = node.params;
-      const async = node.async;
-      const type = node.type;
+      const { name } = node.id;
+      const { params } = node;
+      const { async } = node;
+      const { type } = node;
       const method = false;
       const definition = generate(node).code;
 
@@ -56,10 +64,10 @@ const fileParser = (fileObject, filePath) => {
     // This handles the arrow functions
     VariableDeclaration({ node }) {
       if (node.declarations[0].init && node.declarations[0].init.type === 'ArrowFunctionExpression') {
-        const name = node.declarations[0].id.name;
+        const { name } = node.declarations[0].id;
         const params = node.declarations[0].init.params || [];
-        const async = node.declarations[0].init.async;
-        const type = node.declarations[0].init.type;
+        const { async } = node.declarations[0].init;
+        const { type } = node.declarations[0].init;
         const method = false;
         const definition = generate(node).code;
         transform.functionDefinition(fileObject, name, params, async, type, method, definition);
@@ -69,11 +77,11 @@ const fileParser = (fileObject, filePath) => {
     // This handles class methods
     ExpressionStatement({ node }) {
       if (node.expression.right && node.expression.left) {
-        const type = node.expression.right.type;
+        const { type } = node.expression.right;
         if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') {
           const name = `${node.expression.left.object.name}.${node.expression.left.property.name}` || 'anonymousMethod';
           const params = node.expression.right.params || [];
-          const async = node.expression.right.async;
+          const { async } = node.expression.right;
           const method = true;
           const definition = generate(node).code;
           transform.functionDefinition(fileObject, name, params, async, type, method, definition);
@@ -97,8 +105,8 @@ const fileParser = (fileObject, filePath) => {
           name = 'anonymousFunction';
         }
         const params = node.params || [];
-        const async = node.async;
-        const type = node.type;
+        const { async } = node;
+        const { type } = node;
         const method = false;
         const definition = generate(node).code;
         transform.functionDefinition(fileObject, name, params, async, type, method, definition);
