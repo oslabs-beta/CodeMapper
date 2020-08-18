@@ -1,3 +1,4 @@
+const generate = require('@babel/generator').default;
 // for dev us if needed since fs can write results to a file for us to look over
 // const fs = require('fs');
 // this file will transform the data from the babel traversing a file into
@@ -5,42 +6,77 @@
 
 const transform = {};
 
-const stringifyFunction = (functionDefinition) => {
-  JSON.stringify(functionDefinition.toString());
-};
-
-transform.function = (path, fileObject) => {
-  // add the function to a file (temporary, for dev use only)
-  // fs.appendFileSync('./testfiles/functions.js', path);
-
+// turns function definitions into the data we need and adds it to the file tree
+transform.functionDefinition = (fileObject, name, params, async, type, method, definition) => {
   // create the object we want to add to the filetree for this function
   const functionInfo = {};
-  // check for the name
-  // if it exists, save it. Otherwise save name as 'anonymous'
-  // functionInfo.name = "stat || unknown";
 
-  // check for the type and set the properties in this object based on it
-  // functionInfo.type = {
-  //   'async': true,
-  //   'arrowFunction': false,
-  //   'anonymous': true
-  // }
+  // check for the name
+  if (name) {
+    // if it exists, save it. Otherwise save name as 'anonymous'
+    functionInfo.name = name;
+  } else {
+    functionInfo.name = 'anonymous';
+  }
+
+  // add whether it's async or not
+  functionInfo.async = async;
+
+  // add type - function declaration, arrow function, or function expression
+  functionInfo.type = type;
+
+  // add whether it's a class method or not
+  functionInfo.method = method;
 
   // check for the arguments and add them to an array
-  // functionInfo.arguments: [
-  //    'file'
-  // ]
+  if (params.length) {
+    functionInfo.parameters = [];
+    for (let i = 0; i < params.length; i += 1) {
+      // this is for simple parameter names
+      if (params[i].name) {
+        functionInfo.parameters.push(params[i].name);
+      } else if (params[i].left.name) {
+        // this is for parameters that have a default assignment
+        functionInfo.parameters.push(`${params[i].left.name} = ${JSON.stringify(params[i].right.elements)}`);
+      }
+    }
+  }
+
+  // add function definition
+  if (definition) {
+    try {
+      functionInfo.definition = definition;
+    } catch (error) {
+      console.log(`Catch statement - error adding definition for ${functionInfo.name}`);
+    }
+  } else {
+    console.log(`Else statement - error adding definition for ${functionInfo.name}`);
+  }
 
   // check for any inner function calls
   // functionInfo.innerFunctionCalls: [
-  // {
-  //   'name': 'fs.stat',
-  //   'arguments': [
-  //     'file',
-  //     stringifyFunction(callback)
-  //   ],
-  //   "functionText": stringifyFunction(definition);
-  // }]
+  //  {
+  //    'name': 'fs.stat',
+  //    'type': 'function', 'method', or 'anonymous method'
+  //    'arguments': [
+  //    'file',
+  //     'stringifyFunction'
+  //    ],
+  //    'parent': {
+  //      'name': 'nameOfThing',
+  //    }
+  //    'leftSibling': 
+  //    scope: 'something',
+  //    recursiveCall: true
+  //  }
+  // ]
+
+  // check for general function calls
+    // check whether it's an import or was defined in the file
+    // how it communicates with the environment -
+    // what data it takes in
+    // what data it returns
+    // check whether it's a pre-built function
 
   // and then add it into the file tree
   if (fileObject.functionDeclarations) {
@@ -51,12 +87,161 @@ transform.function = (path, fileObject) => {
   }
 };
 
-transform.import = (path, fileObject) => {
+// helper function for logical expressions
+const handleLogicalExpressions = (parent, result = '') => {
+  const { left } = parent;
+  const { right } = parent;
+  const { operator } = parent;
 
+  // console.log(`right is ${JSON.stringify(right)} and left is ${JSON.stringify(left)} and result is ${result}`);
+  // we always start by adding the right side to the beginning
+  if (right) {
+    if (right.value) {
+      if (right.type === 'NumericLiteral') {
+        if (result) {
+          result = `${operator} ${right.value} ${result}`;
+        } else {
+          result = `${operator} ${right.value}`;
+        }
+      }
+      if (right.type === 'StringLiteral') {
+        if (result) {
+          result = `${operator} '${right.value}' ${result}`;
+        } else {
+          result = `${operator} '${right.value}'`;
+        }
+      }
+    }
+    if (right.name) {
+      if (result) {
+        result = `${operator} ${right.name} ${result}`;
+      } else {
+        result = `${operator} ${right.name}`;
+      }
+    }
+  }
+
+  // termination case
+  if (left.type === 'Identifier') {
+    // add the name and then return the result
+    result = `${left.name} ${result}`;
+    return result;
+  }
+
+  if (left.type === 'NumericLiteral') {
+    // add the name and then return the result
+    result = `${left.value} ${result}`;
+    return result;
+  }
+
+  if (left.type === 'StringLiteral') {
+    // add the name and then return the result
+    result = `'${left.value}' ${result}`;
+    return result;
+  }
+
+  // otherwise, recurse
+  return handleLogicalExpressions(left, result);
+};
+
+// turns function calls into the data we need and adds it to the file tree
+transform.functionCall = (fileObject, name, type, args) => {
+  // console.log('got into function call');
+  const functionInfo = {};
+
+  // check for the name
+  if (name) {
+    // if it exists, save it. Otherwise save name as 'anonymous'
+    functionInfo.name = name;
+  } else {
+    functionInfo.name = 'anonymous';
+  }
+
+  // add type - function, method, or anonymous method
+  functionInfo.type = type;
+  functionInfo.arguments = [];
+
+  if (args.length) {
+    for (let i = 0; i < args.length; i += 1) {
+      // console.log(args[i]);
+      const arg = args[i];
+      let label;
+      let argObject;
+      // number or function call or variable
+      if (arg.value) {
+        if (arg.type === 'StringLiteral') {
+          label = `'${arg.value}'`;
+        } else {
+          label = arg.value;
+        }
+      } else if (arg.callee && arg.callee.name) {
+        label = arg.callee.name;
+      } else if (arg.name) {
+        label = arg.name;
+      } else if (arg.type === 'ArrowFunctionExpression') {
+        const node = arg;
+        let callbackName;
+        if (node.id) {
+          callbackName = node.id.name;
+        } else { // this adds a whole object for the function definition
+          callbackName = 'anonymousFunction';
+          const params = node.params || [];
+          const async = node.async;
+          const type = node.type;
+          const method = false;
+          const definition = generate(node).code;
+          argObject = {
+            callbackName,
+            params,
+            async,
+            type,
+            method,
+            definition,
+          };
+        }
+      } else if (arg.type === 'LogicalExpression') {
+        // console.log('got into logical expression for arg ', arg);
+        // call helper function
+        label = handleLogicalExpressions(arg);
+      }
+      functionInfo.arguments.push(label || argObject);
+    }
+  }
+
+  // and then add it into the file tree
+  if (fileObject.functionCalls) {
+    fileObject.functionCalls.push(functionInfo);
+  } else {
+    fileObject.functionCalls = [];
+    fileObject.functionCalls.push(functionInfo);
+  }
+
+  // idea for other things that could be handy to add
+  //  {
+  //    'name': 'fs.stat',
+  //    'type': 'function', 'method', or 'anonymous method'
+  //    'arguments': [
+  //    'file',
+  //     'stringifyFunction'
+  //    ],
+  //    'parent': {
+  //      'name': 'nameOfThing',
+  //    }
+  //    'siblings': '',
+  //    scope: 'something',
+  //    recursiveCall: true
+  //  }
+};
+
+transform.import = (path, fileObject) => {
+  // name
+  // type: node module or local file
+  // is it being used?
 };
 
 transform.export = (path, fileObject) => {
-
+  // name
+  // default: true or false
 };
 
 module.exports = { transform };

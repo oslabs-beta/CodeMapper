@@ -55,7 +55,7 @@ async function generateTree(rootPath, include = [], exclude = []) {
     fs.writeFile(PATH.resolve(__dirname, '../data/fileTree.json'), JSON.stringify(fileTree, null, 2), err => {
       if (err) console.error(`There was an error writing tree data to the file: ${err}`);
 
-      console.log(JSON.stringify(fileTree, null, 2));
+      // console.log(JSON.stringify(fileTree, null, 2));
     });
 
     // and return the filetree
