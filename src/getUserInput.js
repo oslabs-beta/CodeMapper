@@ -76,7 +76,7 @@ function rootDirOption() {
 
     if (userInput === 'q') process.exit();
     if (userInput.length > 0) {
-      // rootDir = PATH.resolve(__dirname, userInput);
+      rootDir = PATH.resolve(__dirname, userInput);
       rootDir = userInput;
       return getUserChoices();
     }

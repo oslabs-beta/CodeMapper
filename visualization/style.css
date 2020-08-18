@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: calc(100% + 6rem);
+}
+
+body {
+  display: grid;
+  place-items: center;
+  background-color: #1e272e;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 16px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 1rem 2.5rem 2.5rem;
+}
+
+h1 {
+  color: #ffdd59;
+  font-weight: 400;
+  font-size: 3rem;
+  margin: 0 0 2.5rem 0;
+  letter-spacing: 0.2rem;
+}
+
+#data-vis {
+  background-color: #1e272e;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  cursor: pointer;
+}

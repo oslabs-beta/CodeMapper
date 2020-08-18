@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/getUserInput.js",
+    "start": "node ./src/getUserInput.js && npm run generate-data",
+    "generate-data": "node ./src/generateFoamTreeData.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

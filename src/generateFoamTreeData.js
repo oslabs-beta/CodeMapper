@@ -18,11 +18,15 @@ function relativePath(fullPath, depth) {
 // add output object properties
 function outputObjProps(obj) {
   const {
-    name, path, depth, size, content,
+    name, path, depth, size, isDirectory, content,
   } = obj;
   const newObj = {};
 
-  newObj.label = name;
+  if (!isDirectory) {
+    newObj.label = `${name}\n${(size / 1000).toFixed(1)} kB`;
+  } else {
+    newObj.label = name;
+  }
   newObj.rPath = relativePath(path, depth);
   newObj.size = size;
   // replace content property name with groups
@@ -67,11 +71,10 @@ function generateFoamTreeArray(fileTreeArr) {
 
 // add generateFoamTreeArray to foamTreeData object
 foamTreeData.groups = generateFoamTreeArray(fileTree);
-// console.log(JSON.stringify(foamTreeData, null, 2));
 
 // write to the result foam tree object
-fs.writeFile(PATH.resolve(__dirname, '../data/foamTreeDataObj.json'), JSON.stringify(foamTreeData, null, 2), 'utf8', err => {
+fs.writeFile(PATH.resolve(__dirname, '../data/foamTreeDataObj.js'), `export default ${JSON.stringify(foamTreeData, null, 2)}`, 'utf8', err => {
   if (err) throw err;
 
-  console.log('foamTreeDataObj.json was created in /data');
+  console.log('foamTreeDataObj.json was created in /data\n');
 });
