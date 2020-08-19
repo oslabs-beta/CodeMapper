@@ -1,7 +1,6 @@
 const fs = require('fs');
 const PATH = require('path');
 
-let fileTree = require('../data/fileTree.json');
 // create return data object
 const foamTreeData = {};
 
@@ -70,11 +69,15 @@ function generateFoamTreeArray(fileTreeArr) {
 }
 
 // add generateFoamTreeArray to foamTreeData object
-foamTreeData.groups = generateFoamTreeArray(fileTree);
+async function writeFoamTreeData(tree) {
+  foamTreeData.groups = await generateFoamTreeArray(tree);
 
 // write to the result foam tree object
-fs.writeFile(PATH.resolve(__dirname, '../data/foamTreeDataObj.js'), `export default ${JSON.stringify(foamTreeData, null, 2)}`, 'utf8', err => {
-  if (err) throw err;
+  fs.writeFile(PATH.resolve(__dirname, '../data/foamTreeDataObj.js'), `export default ${JSON.stringify(foamTreeData, null, 2)}`, 'utf8', err => {
+    if (err) throw err;
 
-  console.log('foamTreeDataObj.json was created in /data\n');
-});
+    console.log('\n*** Data for visualization created ***\n');
+  });
+}
+
+module.exports = { writeFoamTreeData };

@@ -2,23 +2,6 @@
 /* eslint-disable no-undef */
 import foamTreeDataObj from '../data/foamTreeDataObj.js';
 
-/*
-{
-  layout: "ordered",
-  stacking: "flattened",
-  groupBorderRadius: 0,
-  groupBorderWidth: 0,
-  groupInsetWidth: 0,
-  groupFillType: "plain",
-  groupStrokeWidth: 0,
-  groupStrokePlainLightnessShift: -20,
-  rainbowStartColor: "hsla(0, 100%, 60%, 1)",
-  rainbowEndColor: "hsla(360, 100%, 60%, 1)",
-  groupLabelFontFamily: "Oxygen",
-  attributionPosition: 45
-}
-*/
-
 window.addEventListener('load', () => {
   // Perform FoamTree embedding here
   if (CarrotSearchFoamTree.supported) {
@@ -31,10 +14,10 @@ window.addEventListener('load', () => {
       descriptionGroupSize: 0.12,
       descriptionGroupDistanceFromCenter: 0,
       groupLabelFontFamily: 'Oxygen',
-      groupLabelMinFontSize: 2,
+      groupLabelMinFontSize: 16,
       groupLabelMaxFontSize: 24,
       groupLabelVerticalPadding: 0.1,
-      groupLabelHorizontalPadding: 0.1,
+      groupLabelHorizontalPadding: 0.8,
       groupLabelLineHeight: 1.3,
       groupBorderRadius: 0,
       groupBorderWidth: 1,
@@ -64,10 +47,6 @@ window.addEventListener('load', () => {
       groupBorderRadius: 0,
     });
     foamtree.redraw();
-
-    let { groups } = foamtree.get('dataObject');
-    console.log('groups =', groups);
-    console.log(foamtree.get('geometry', groups[2]));
   } else {
     console.log('Unsupported brower for FoamTree visualizations');
   }

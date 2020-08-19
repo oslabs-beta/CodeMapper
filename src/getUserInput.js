@@ -1,6 +1,6 @@
 const readline = require('readline');
 const PATH = require('path');
-const { generateTree } = require('./generateFileTree');
+const { flow } = require('./flow');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -22,7 +22,7 @@ const excludeArr = [
   '.md',
 ];
 
-// set root path, I feel this could be another option given to the user but a default of root can be set if no value is input or input is invalid
+// set default root path to the same level as this file's folder
 let rootDir = PATH.resolve(__dirname, '../');
 
 // modify the include and exclude options based on user input
@@ -34,7 +34,7 @@ function addToInclude() {
     if (userInput === 'q') process.exit();
     if (userInput === 'm') {
       rl.close();
-      return generateTree(rootDir, includeArr, excludeArr);
+      return flow(rootDir, includeArr, excludeArr);
     }
     includeArr.push(userInput);
     return addToInclude();
@@ -49,7 +49,7 @@ function addToExclude() {
     if (input === 'q') process.exit();
     if (input === 'm') {
       rl.close();
-      return generateTree(rootDir, includeArr, excludeArr);
+      return flow(rootDir, includeArr, excludeArr);
     }
     excludeArr.push(input);
     return addToExclude();
@@ -84,32 +84,36 @@ function rootDirOption() {
     if (userInput === '') {
       return getUserChoices();
     }
+
+    return 0;
   });
+
+  return 0;
 }
 
-// modify options based on user input
+// modify the include or exclude property array in the options object based on user input
 const greeting = `Welcome to CodeMapper!\n
-You can choose to include or exclude folders or files to create a
-visualization of. If you use the include option, only those folders or
-files will be included. If you want to map everything simply choose the
-type \'i\', and then type \'m\' at the first prompt.
-\nFolders and Files that are excluded by default include:
+  You can choose to include or exclude folders or files to create a
+  visualization of. If you use the include option, only those folders or
+  files will be included. If you want to map everything simply choose the
+  type 'i', and then type 'm' at the first prompt.
+  \nFolders and Files that are excluded by default include:
 
-['node_modules', 'LICENSE', '.git*', '.DS_Store', '.vscode',
-'package.json', 'package-lock.json', 'yarn.lock', '*.md']
+  ['node_modules', 'LICENSE', '.git*', '.DS_Store', '.vscode',
+  'package.json', 'package-lock.json', 'yarn.lock', '*.md']
 
-If you choose the exclude option, you can add more folders or files to
-the default list.
+  If you choose the exclude option, you can add more folders or files to
+  the default list.
 
-Type 'q' to exit the program.
-`;
+  Type 'q' to exit the program.
+  `;
 
-// Ask if user wants to clear their console before proceeding
+  // Ask if user wants to clear their console before proceeding
 rl.question('If you like to clear the console before proceeding, enter \'c\': ', userInput => {
   userInput = userInput.trim();
 
   if (userInput === 'q') return process.exit();
-  if (userInput.toLowerCase() === 'c') process.stdout.write('\033c');
+  if (userInput.toLowerCase() === 'c') process.stdout.write('\x1Bc');
 
   console.log(greeting);
 
