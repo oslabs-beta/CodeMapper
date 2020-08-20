@@ -12,9 +12,10 @@ const { writeFoamTreeData } = require('./generateFoamTreeData');
 async function flow(rootPath, include, exclude) {
   // call generateTree with the root path passed in
   const fileTree = await generateTree(rootPath, include, exclude);
+  console.log(JSON.stringify(fileTree, null, 2));
 
   // create foamTree data for browser project tree data visualization
-  await writeFoamTreeData(fileTree);
+  writeFoamTreeData(fileTree);
 
   // these two could be concurrent
     // call createStructureResult with the file tree passed in
@@ -22,7 +23,7 @@ async function flow(rootPath, include, exclude) {
 
     // call filter, passing in the file tree, to get an array of pointers to the JS file objects
     // this will also pass all the js files to the parser
-  // await filterAndParse(fileTree);
+  // filterAndParse(fileTree);
   // fs.writeFileSync(PATH.resolve(__dirname, '../data/finalTree.json'), JSON.stringify(fileTree, null, 2));
   // console.log('All done! look in testfiles/finalTree.json to see the current result.');
 

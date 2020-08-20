@@ -73,6 +73,12 @@ async function writeFoamTreeData(tree) {
   foamTreeData.groups = await generateFoamTreeArray(tree);
 
 // write to the result foam tree object
+  const data = PATH.resolve(__dirname, '../data');
+
+  if (!fs.existsSync(data)) {
+    fs.mkdirSync(data);
+  }
+
   fs.writeFile(PATH.resolve(__dirname, '../data/foamTreeDataObj.js'), `export default ${JSON.stringify(foamTreeData, null, 2)}`, 'utf8', err => {
     if (err) throw err;
 

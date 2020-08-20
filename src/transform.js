@@ -65,7 +65,7 @@ transform.functionDefinition = (fileObject, name, params, async, type, method, d
   //    'parent': {
   //      'name': 'nameOfThing',
   //    }
-  //    'leftSibling': 
+  //    'leftSibling':
   //    scope: 'something',
   //    recursiveCall: true
   //  }
@@ -186,8 +186,8 @@ transform.functionCall = (fileObject, name, type, args) => {
         } else { // this adds a whole object for the function definition
           callbackName = 'anonymousFunction';
           const params = node.params || [];
-          const async = node.async;
-          const type = node.type;
+          const { async } = node;
+          const { type } = node;
           const method = false;
           const definition = generate(node).code;
           argObject = {
