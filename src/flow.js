@@ -8,10 +8,9 @@ const { writeFoamTreeData } = require('./generateFoamTreeData');
 // const createFunctionalityResult = require('./createFunctionalityResult');
 // const buildResults = require('./buildResults');
 
-async function flow(rootPath, include, exclude) {
+async function flow(root, include, exclude) {
   // call generateTree with the root path passed in
-  const fileTree = await generateTree(rootPath, include, exclude);
-  console.log(JSON.stringify(fileTree, null, 2));
+  const fileTree = await generateTree(root, include, exclude);
 
   // create foamTree data for browser project tree data visualization
   writeFoamTreeData(fileTree);
@@ -23,9 +22,13 @@ async function flow(rootPath, include, exclude) {
 
     // call filter, passing in the file tree, to get an array of pointers to the JS file objects
     // this will also pass all the js files to the parser
-  filterAndParse(fileTree);
-  fs.writeFileSync('../data/finalTree.json', JSON.stringify(fileTree, null, 2));
-  console.log('All done! look in data/finalTree.json to see the current result.');
+  try {
+    filterAndParse(fileTree);
+    fs.writeFileSync(PATH.resolve(__dirname, '../data/finalTree.json'), JSON.stringify(fileTree, null, 2));
+    console.log('\x1b[32m', 'All done! look in data/finalTree.json to see the current result.\x1b[37m');
+  } catch (err) {
+    console.error(`Error in flow.js with filterAndParse(fileTree): ${err.message}`);
+  }
 
   // our original fileTree should now be modified to give us what we need for generating other results
   // so we'll pass it to our other results-generating functions
@@ -40,4 +43,4 @@ async function flow(rootPath, include, exclude) {
   // buildResults(results);
 }
 
-module.exports = { flow };
+module.exports = flow;

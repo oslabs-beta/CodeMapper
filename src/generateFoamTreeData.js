@@ -82,7 +82,7 @@ async function writeFoamTreeData(tree) {
   fs.writeFile(PATH.resolve(__dirname, '../data/foamTreeDataObj.js'), `export default ${JSON.stringify(foamTreeData, null, 2)}`, 'utf8', err => {
     if (err) throw err;
 
-    console.log('\n*** Data for visualization created ***\n');
+    console.log('\x1b[32m\n\t*** Data for visualization created ***\n The Project Structure can now be viewed in the browser\x1b[37m\n');
   });
 }
 

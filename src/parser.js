@@ -211,16 +211,22 @@ const fileParser = (fileObject, filePath) => {
 
     // This handles class methods
     ExpressionStatement({ node }) {
-      if (node.expression.right && node.expression.left) {
-        const { type } = node.expression.right;
-        if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') {
-          const name = `${node.expression.left.object.name}.${node.expression.left.property.name}` || 'anonymousMethod';
-          const params = node.expression.right.params || [];
-          const { async } = node.expression.right;
-          const method = true;
-          const definition = generate(node).code;
-          transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+      try {
+        if (node.expression.right && node.expression.left) {
+          const { type } = node.expression.right;
+          if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') {
+            const name = `${node.expression.left.object.name}.${node.expression.left.property.name}` || 'anonymousMethod';
+            const params = node.expression.right.params || [];
+            const { async } = node.expression.right;
+            const method = true;
+            const definition = generate(node).code;
+            transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+          }
         }
+      } catch (err) {
+        console.error('\n\x1b[31m\t=== ERROR MESSAGE ===\x1b[37m\nError in parser.js with the { node } object parameter.');
+        console.error(err.message);
+        throw new Error(err.message);
       }
 
       // This handles functions' inner function calls
