@@ -1,6 +1,7 @@
 const readline = require('readline');
 const PATH = require('path');
 const { generateTree } = require('./generateFileTree');
+const flow = require ('./flow.js');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -33,7 +34,7 @@ function addToInclude() {
     if (userInput === 'q') process.exit();
     if (userInput === 'm') {
       rl.close();
-      return generateTree(rootDir, includeArr, excludeArr);
+      return flow(rootDir, includeArr, excludeArr);
     }
     includeArr.push(userInput);
     return addToInclude();
@@ -48,7 +49,7 @@ function addToExclude() {
     if (input === 'q') process.exit();
     if (input === 'm') {
       rl.close();
-      return generateTree(rootDir, includeArr, excludeArr);
+      return flow(rootDir, includeArr, excludeArr);
     }
     excludeArr.push(input);
     return addToExclude();
@@ -108,7 +109,7 @@ rl.question('If you like to clear the console before proceeding, enter \'c\': ',
   userInput = userInput.trim();
 
   if (userInput === 'q') return process.exit();
-  if (userInput.toLowerCase() === 'c') process.stdout.write('\033c');
+  if (userInput.toLowerCase() === 'c') process.stdout.write('\x1Bc');
 
   console.log(greeting);
 
