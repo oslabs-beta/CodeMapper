@@ -8,7 +8,7 @@
   "size": 14060,
   "contents": {
     "exports": {
-      "name": { // the original name or "anonymous1", "anonymous2", etc.
+      "name": {
         "type": {
           "async": true,
           "arrowFunction": false,
@@ -17,7 +17,7 @@
       }
     },
     "imports": {
-      "name": { // this will be what this file named it
+      "name": {
         "originalName": "point this to the originalFile.contents.exports.name",
         "type": "point this to the originalFile.contents.exports.type"
       }

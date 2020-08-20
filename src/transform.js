@@ -185,14 +185,29 @@ transform.functionCall = (fileObject, name, type, args) => {
           callbackName = node.id.name;
         } else { // this adds a whole object for the function definition
           callbackName = 'anonymousFunction';
-          const params = node.params || [];
+          const nodeParams = node.params || [];
+
+          // check for the arguments and add them to an array
+          const callbackParams = [];
+          if (nodeParams.length) {
+            for (let i = 0; i < nodeParams.length; i += 1) {
+              // this is for simple parameter names
+              if (nodeParams[i].name) {
+                callbackParams.push(nodeParams[i].name);
+              } else if (nodeParams[i].left.name) {
+                // this is for parameters that have a default assignment
+                callbackParams.push(`${nodeParams[i].left.name} = ${JSON.stringify(nodeParams[i].right.elements)}`);
+              }
+            }
+          }
+
           const { async } = node;
           const { type } = node;
           const method = false;
           const definition = generate(node).code;
           argObject = {
             callbackName,
-            params,
+            callbackParams,
             async,
             type,
             method,
@@ -233,10 +248,28 @@ transform.functionCall = (fileObject, name, type, args) => {
   //  }
 };
 
-transform.import = (path, fileObject) => {
-  // name
-  // type: node module or local file
-  // is it being used?
+transform.import = (fileObject, fileName, fileType, methodUsed, variableSet) => {
+  const importInfo = {};
+
+  // fileType will either be node module or local module
+  importInfo.fileType = fileType;
+
+  // name of the file or module being imported
+  importInfo.fileName = fileName;
+
+  // methodUsed will either be require or import
+  importInfo.methodUsed = methodUsed;
+
+  // variableSet will always be an array of objects with a name and type property on each
+  importInfo.namedImports = variableSet;
+
+  // and then add it into the file tree
+  if (!fileObject.imports) {
+    fileObject.imports = [];
+  }
+  fileObject.imports.push(importInfo);
+
+  // we could also check if it's being used?
 };
 
 transform.export = (path, fileObject) => {
