@@ -53,8 +53,8 @@ const fileParser = (fileObject, filePath) => {
       transform.functionDefinition(fileObject, name, params, async, type, method, definition);
     },
 
-    // This handles the arrow functions
     VariableDeclaration({ node }) {
+      // This handles the arrow functions
       if (node.declarations[0].init && node.declarations[0].init.type === 'ArrowFunctionExpression') {
         const name = node.declarations[0].id.name;
         const params = node.declarations[0].init.params || [];
@@ -64,6 +64,149 @@ const fileParser = (fileObject, filePath) => {
         const definition = generate(node).code;
         transform.functionDefinition(fileObject, name, params, async, type, method, definition);
       }
+
+      // This handles the require statements without any extra details added on to the require invocation (like a '.default' or settings object)
+      if (node.declarations[0].init) {
+        // We'll handle imports assigned to variables here
+        // for example var promise = import("module-name");
+        if (node.declarations[0].init.callee && node.declarations[0].init.callee.type === 'Import') {
+          const variable = {};
+          const variableSet = [];
+          variable.name = node.declarations[0].id.name;
+          variable.type = 'local name';
+          variableSet.push(variable);
+          const fileName = node.declarations[0].init.arguments[0].value;
+          fileName.trim();
+
+          let fileType = '';
+          if (fileName.charAt(0) === '.') {
+            fileType = 'local module';
+          } else {
+            fileType = 'node module';
+          }
+
+          const methodUsed = 'dynamic import';
+
+          transform.import(fileObject, fileName, fileType, methodUsed, variableSet);
+        }
+
+        if ((node.declarations[0].init.type === 'CallExpression' && node.declarations[0].init.callee.name === 'require') || (node.declarations[0].init.type === 'MemberExpression' && node.declarations[0].init.object.callee && node.declarations[0].init.object.callee.name === 'require')) {
+          const variableSet = [];
+
+          // when we're naming the default we're bringing in
+          if (node.declarations[0].id.type === 'Identifier') {
+            const variable = {};
+            variable.name = node.declarations[0].id.name;
+            variable.type = 'local name';
+            variableSet.push(variable);
+          }
+
+          // for when we destructure the things we're importing
+          // when we're destructuring a specific thing we're importing
+          if (node.declarations[0].id.type === 'ObjectPattern' && node.declarations[0].id.properties.length) {
+            for (let i = 0; i < node.declarations[0].id.properties.length; i += 1) {
+              const variable = {};
+              variable.name = node.declarations[0].id.properties[i].value.name;
+              variable.type = 'original name';
+              variableSet.push(variable);
+            }
+          }
+
+          // we may need to adjust this later if it's possible to chain more than one thing after the require invocation
+          let fileName;
+          if (node.declarations[0].init.arguments) {
+            fileName = node.declarations[0].init.arguments[0].value;
+          } else {
+            fileName = node.declarations[0].init.object.arguments[0].value;
+            // console.log(`No arguments property on init. Init is ${JSON.stringify(node.declarations[0].init)}`);
+          }
+          fileName.trim();
+
+          let fileType = '';
+          if (fileName.charAt(0) === '.') {
+            fileType = 'local module';
+          } else {
+            fileType = 'node module';
+          }
+
+          const methodUsed = 'require';
+
+          // console.log(`file name is ${fileName} and file type is ${fileType} and method used is ${methodUsed} and variable set looks like ${JSON.stringify(variableSet)}`);
+
+          transform.import(fileObject, fileName, fileType, methodUsed, variableSet);
+        }
+      }
+    },
+
+    // This handles import statements
+    ImportDeclaration({ node }) {
+      const variableSet = [];
+
+      for (let i = 0; i < node.specifiers.length; i += 1) {
+        const variable = {};
+        const current = node.specifiers[i];
+        variable.name = current.local.name;
+
+        // for when we select specific things to bring in
+        if (current.type === 'ImportSpecifier') {
+          variable.type = 'original name';
+          variable.originalName = variable.name;
+        } else if (current.type === 'ImportDefaultSpecifier') {
+          // if we only import one variable and it's not destructured
+          variable.type = 'local name';
+        } else if (current.type === 'ImportNamespaceSpecifier') {
+          variable.type = 'local name';
+          variable.originalName = '*';
+        }
+
+        // if we know the original name because we're using an alias, add it
+        if (current.imported && current.imported.name) {
+          variable.originalName = current.imported.name;
+        } else if (!variable.originalName) {
+          variable.originalName = 'unknown';
+        }
+
+        variableSet.push(variable);
+      }
+
+      const fileName = node.source.value.trim();
+      let fileType;
+      if (fileName.charAt(0) === '.') {
+        fileType = 'local module';
+      } else {
+        fileType = 'node module';
+      }
+      const methodUsed = 'import';
+
+
+      transform.import(fileObject, fileName, fileType, methodUsed, variableSet);
+    },
+
+    ExportNamedDeclaration({ node }) {
+      const variableSet = [];
+
+      // for variable declarations being exported
+      for (let i = 0; i < node.declaration.declarations.length; i += 1) {
+        const variable = {};
+        variable.name = node.declaration.declarations[i].id.name;
+        variable.value = node.declaration.declarations[i].init.name || 'unknown';
+        variableSet.push(variable);
+      }
+
+      // for object exports with variables passed in to build the object
+      for (let i = 0; i < node.specifiers.length; i += 1) {
+        const variable = {};
+        variable.originalName = node.specifiers[i].local.name;
+        variable.exportName = node.specifiers[i].exported.name;
+      }
+    },
+
+    ExportDefaultDeclaration({ node }) {
+
+    },
+
+    ExportAllDeclaration({ node }) {
+      const exportSource = node.source.value;
     },
 
     // This handles class methods
@@ -114,32 +257,40 @@ const fileParser = (fileObject, filePath) => {
       let type;
       // we'll grab the name of the function being called
       // for regular functions
-      if (node.callee && node.callee.name) {
-        name = node.callee.name;
-        type = 'function';
-      } else if (node.callee.object && node.callee.object.name) {
-        // for regular class methods
-        name = `${node.callee.object.name}.${node.callee.property.name}`;
-        type = 'method';
-      } else if (node.callee.object.object && node.callee.object.property && node.callee.object.object.name && node.callee.object.property.name) {
-        // for methods called on object properties
-        name = `${node.callee.object.object.name}.${node.callee.object.property.name}.${node.callee.property.name}`;
-        type = 'method';
-      } else if (node.callee.property && node.callee.property.name) {
-        // and for class/prototype methods we can't identify the object of
-        name = `anonymous.${node.callee.property.name}`;
-        type = 'anonymous method';
-      } else if (node.callee && node.callee.id && node.callee.id.name) {
-        name = node.callee.id.name;
-        type = 'immediately invoked function expression';
-      } else {
-        name = 'anonymous';
-        type = 'anonymous function';
-      }
-      // grab the arguments (this will be an empty array if no arguments are there)
-      const args = node.arguments;
+      if (node.callee.type !== 'Import') {
+        if (node.callee && node.callee.name) {
+          // handling all regular function calls except require statements here
+          if (node.callee.name !== 'require') {
+            name = node.callee.name;
+            type = 'function';
+          }
+        } else if (node.callee.object && node.callee.object.name) {
+          // for regular class methods
+          name = `${node.callee.object.name}.${node.callee.property.name}`;
+          type = 'method';
+        } else if (node.callee.object && node.callee.object.object && node.callee.object.property && node.callee.object.object.name && node.callee.object.property.name) {
+          // for methods called on object properties
+          name = `${node.callee.object.object.name}.${node.callee.object.property.name}.${node.callee.property.name}`;
+          type = 'method';
+        } else if (node.callee.property && node.callee.property.name) {
+          // and for class/prototype methods we can't identify the object of
+          name = `anonymous.${node.callee.property.name}`;
+          type = 'anonymous method';
+        } else if (node.callee && node.callee.id && node.callee.id.name) {
+          name = node.callee.id.name;
+          type = 'immediately invoked function expression';
+        } else {
+          name = 'anonymous';
+          type = 'anonymous function';
+        }
+        // grab the arguments (this will be an empty array if no arguments are there)
+        // we should revisit this because we should be handling the node logic here instead
+        // or actually... perhaps this is how we should be handling all the node visitor patterns
+        // and letting transform do the parsing out of the details for each thing
+        const args = node.arguments;
 
-      transform.functionCall(fileObject, name, type, args);
+        transform.functionCall(fileObject, name, type, args);
+      }
 
       // or if object type is call expression, then it's in a chain of methods, so we won't have the object name but we still get the method name
       // arguments are always at path.node.arguments
