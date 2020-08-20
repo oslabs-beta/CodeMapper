@@ -122,10 +122,6 @@ const handleLogicalExpressions = (parent, result = '') => {
   }
 
   // termination case
-  if (left === undefined) {
-    result = `${left}`;
-    return result;
-  }
   if (left.type === 'Identifier') {
     // add the name and then return the result
     result = `${left.name} ${result}`;

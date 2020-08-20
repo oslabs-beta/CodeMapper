@@ -27,7 +27,7 @@ async function flow(root, include, exclude) {
     fs.writeFileSync(PATH.resolve(__dirname, '../data/finalTree.json'), JSON.stringify(fileTree, null, 2));
     console.log('\x1b[32m', 'All done! look in data/finalTree.json to see the current result.\x1b[37m');
   } catch (err) {
-    console.error(`Error in flow.js with filterAndParse(fileTree): ${err.message}`);
+    console.error(`\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`);
   }
 
   // our original fileTree should now be modified to give us what we need for generating other results
