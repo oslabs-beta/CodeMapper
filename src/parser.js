@@ -3,6 +3,7 @@ const babel = require('@babel/core');
 const traverse = require('@babel/traverse').default;
 const generate = require('@babel/generator').default;
 const fs = require('fs');
+const PATH = require('path');
 const { transform } = require('./transform');
 
 // this function is only for dev and can be removed for production
@@ -18,7 +19,7 @@ const createAST = filePath => {
   });
 
   // write the ast to a file (temporary)
-  fs.writeFileSync('../data/data.json', JSON.stringify(ast, null, 2));
+  fs.writeFileSync(PATH.resolve(__dirname, '../data/data.json'), JSON.stringify(ast, null, 2));
 };
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
