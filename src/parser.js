@@ -3,6 +3,7 @@ const babel = require('@babel/core');
 const traverse = require('@babel/traverse').default;
 const generate = require('@babel/generator').default;
 const fs = require('fs');
+const PATH = require('path');
 const { transform } = require('./transform');
 
 // this function is only for dev and can be removed for production
@@ -18,7 +19,7 @@ const createAST = filePath => {
   });
 
   // write the ast to a file (temporary)
-  fs.writeFileSync('../data/data.json', JSON.stringify(ast, null, 2));
+  fs.writeFileSync(PATH.resolve(__dirname, '../data/data.json'), JSON.stringify(ast, null, 2));
 };
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
@@ -43,10 +44,10 @@ const fileParser = (fileObject, filePath) => {
 
     // This is for regular function expressions (not anonymous/arrow functions)
     FunctionDeclaration({ node }) {
-      const name = node.id.name;
-      const params = node.params;
-      const async = node.async;
-      const type = node.type;
+      const { name } = node.id;
+      const { params } = node;
+      const { async } = node;
+      const { type } = node;
       const method = false;
       const definition = generate(node).code;
 
@@ -56,10 +57,10 @@ const fileParser = (fileObject, filePath) => {
     VariableDeclaration({ node }) {
       // This handles the arrow functions
       if (node.declarations[0].init && node.declarations[0].init.type === 'ArrowFunctionExpression') {
-        const name = node.declarations[0].id.name;
+        const { name } = node.declarations[0].id;
         const params = node.declarations[0].init.params || [];
-        const async = node.declarations[0].init.async;
-        const type = node.declarations[0].init.type;
+        const { async } = node.declarations[0].init;
+        const { type } = node.declarations[0].init;
         const method = false;
         const definition = generate(node).code;
         transform.functionDefinition(fileObject, name, params, async, type, method, definition);
@@ -211,16 +212,22 @@ const fileParser = (fileObject, filePath) => {
 
     // This handles class methods
     ExpressionStatement({ node }) {
-      if (node.expression.right && node.expression.left) {
-        const type = node.expression.right.type;
-        if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') {
-          const name = `${node.expression.left.object.name}.${node.expression.left.property.name}` || 'anonymousMethod';
-          const params = node.expression.right.params || [];
-          const async = node.expression.right.async;
-          const method = true;
-          const definition = generate(node).code;
-          transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+      try {
+        if (node.expression.right && node.expression.left) {
+          const { type } = node.expression.right;
+          if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') {
+            const name = `${node.expression.left.object.name}.${node.expression.left.property.name}` || 'anonymousMethod';
+            const params = node.expression.right.params || [];
+            const { async } = node.expression.right;
+            const method = true;
+            const definition = generate(node).code;
+            transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+          }
         }
+      } catch (err) {
+        console.error('\n\x1b[31m\t=== ERROR MESSAGE ===\x1b[37m\nError in parser.js with the { node } object parameter.');
+        console.error(err.message);
+        throw new Error(err.message);
       }
 
       // This handles functions' inner function calls
@@ -240,8 +247,8 @@ const fileParser = (fileObject, filePath) => {
           name = 'anonymousFunction';
         }
         const params = node.params || [];
-        const async = node.async;
-        const type = node.type;
+        const { async } = node;
+        const { type } = node;
         const method = false;
         const definition = generate(node).code;
         transform.functionDefinition(fileObject, name, params, async, type, method, definition);

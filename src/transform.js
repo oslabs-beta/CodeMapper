@@ -65,7 +65,7 @@ transform.functionDefinition = (fileObject, name, params, async, type, method, d
   //    'parent': {
   //      'name': 'nameOfThing',
   //    }
-  //    'leftSibling': 
+  //    'leftSibling':
   //    scope: 'something',
   //    recursiveCall: true
   //  }
@@ -194,15 +194,15 @@ transform.functionCall = (fileObject, name, type, args) => {
               // this is for simple parameter names
               if (nodeParams[i].name) {
                 callbackParams.push(nodeParams[i].name);
-              } else if (nodeParamss[i].left.name) {
+              } else if (nodeParams[i].left.name) {
                 // this is for parameters that have a default assignment
                 callbackParams.push(`${nodeParams[i].left.name} = ${JSON.stringify(nodeParams[i].right.elements)}`);
               }
             }
           }
 
-          const async = node.async;
-          const type = node.type;
+          const { async } = node;
+          const { type } = node;
           const method = false;
           const definition = generate(node).code;
           argObject = {
