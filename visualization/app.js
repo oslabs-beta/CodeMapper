@@ -121,7 +121,7 @@ window.addEventListener('load', () => {
                 </li>
                 <% }) %>
             </ul>
-          <% } % >
+          <% } %>
           
           
           
