@@ -7,7 +7,15 @@ const generate = require('@babel/generator').default;
 const transform = {};
 
 // turns function definitions into the data we need and adds it to the file tree
-transform.functionDefinition = (fileObject, name, params, async, type, method, definition) => {
+transform.functionDefinition = (
+  fileObject,
+  name,
+  params,
+  async,
+  type,
+  method,
+  definition
+) => {
   // create the object we want to add to the filetree for this function
   const functionInfo = {};
 
@@ -37,7 +45,9 @@ transform.functionDefinition = (fileObject, name, params, async, type, method, d
         functionInfo.parameters.push(params[i].name);
       } else if (params[i].left.name) {
         // this is for parameters that have a default assignment
-        functionInfo.parameters.push(`${params[i].left.name} = ${JSON.stringify(params[i].right.elements)}`);
+        functionInfo.parameters.push(
+          `${params[i].left.name} = ${JSON.stringify(params[i].right.elements)}`
+        );
       }
     }
   }
@@ -47,10 +57,14 @@ transform.functionDefinition = (fileObject, name, params, async, type, method, d
     try {
       functionInfo.definition = definition;
     } catch (error) {
-      console.log(`Catch statement - error adding definition for ${functionInfo.name}`);
+      console.log(
+        `Catch statement - error adding definition for ${functionInfo.name}`
+      );
     }
   } else {
-    console.log(`Else statement - error adding definition for ${functionInfo.name}`);
+    console.log(
+      `Else statement - error adding definition for ${functionInfo.name}`
+    );
   }
 
   // check for any inner function calls
@@ -65,18 +79,18 @@ transform.functionDefinition = (fileObject, name, params, async, type, method, d
   //    'parent': {
   //      'name': 'nameOfThing',
   //    }
-  //    'leftSibling': 
+  //    'leftSibling':
   //    scope: 'something',
   //    recursiveCall: true
   //  }
   // ]
 
   // check for general function calls
-    // check whether it's an import or was defined in the file
-    // how it communicates with the environment -
-    // what data it takes in
-    // what data it returns
-    // check whether it's a pre-built function
+  // check whether it's an import or was defined in the file
+  // how it communicates with the environment -
+  // what data it takes in
+  // what data it returns
+  // check whether it's a pre-built function
 
   // and then add it into the file tree
   if (fileObject.functionDeclarations) {
@@ -183,7 +197,8 @@ transform.functionCall = (fileObject, name, type, args) => {
         let callbackName;
         if (node.id) {
           callbackName = node.id.name;
-        } else { // this adds a whole object for the function definition
+        } else {
+          // this adds a whole object for the function definition
           callbackName = 'anonymousFunction';
           const nodeParams = node.params || [];
 
@@ -194,15 +209,19 @@ transform.functionCall = (fileObject, name, type, args) => {
               // this is for simple parameter names
               if (nodeParams[i].name) {
                 callbackParams.push(nodeParams[i].name);
-              } else if (nodeParamss[i].left.name) {
+              } else if (nodeParams[i].left.name) {
                 // this is for parameters that have a default assignment
-                callbackParams.push(`${nodeParams[i].left.name} = ${JSON.stringify(nodeParams[i].right.elements)}`);
+                callbackParams.push(
+                  `${nodeParams[i].left.name} = ${JSON.stringify(
+                    nodeParams[i].right.elements
+                  )}`
+                );
               }
             }
           }
 
-          const async = node.async;
-          const type = node.type;
+          const { async } = node;
+          const { type } = node;
           const method = false;
           const definition = generate(node).code;
           argObject = {
@@ -248,7 +267,13 @@ transform.functionCall = (fileObject, name, type, args) => {
   //  }
 };
 
-transform.import = (fileObject, fileName, fileType, methodUsed, variableSet) => {
+transform.imported = (
+  fileObject,
+  fileName,
+  fileType,
+  methodUsed,
+  variableSet
+) => {
   const importInfo = {};
 
   // fileType will either be node module or local module
@@ -264,10 +289,10 @@ transform.import = (fileObject, fileName, fileType, methodUsed, variableSet) => 
   importInfo.namedImports = variableSet;
 
   // and then add it into the file tree
-  if (!fileObject.imports) {
-    fileObject.imports = [];
+  if (!fileObject.imported) {
+    fileObject.imported = [];
   }
-  fileObject.imports.push(importInfo);
+  fileObject.imported.push(importInfo);
 
   // we could also check if it's being used?
 };

@@ -3,37 +3,57 @@ const babel = require('@babel/core');
 const traverse = require('@babel/traverse').default;
 const generate = require('@babel/generator').default;
 const fs = require('fs');
+const PATH = require('path');
 const { transform } = require('./transform');
 
 // this function is only for dev and can be removed for production
-const createAST = filePath => {
+const createAST = (filePath) => {
   // this gets used by transformSync to generate our AST (only used in dev)
-  const source = fs.readFileSync(filePath, 'utf8');
+  let source;
+  try {
+    source = fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+    console.log(`Found an error while reading a file to generate a dev AST for it: ${err}`);
+  }
 
-  // create the AST just for us to see and work with temporarily (won't be used for end user)
-  const { ast } = babel.transformSync(source, {
-    filename: filePath,
-    ast: true,
-    code: true,
-  });
+  try {
+    // create the AST just for us to see and work with temporarily (won't be used for end user)
+    const { ast } = babel.transformSync(source, {
+      filename: filePath,
+      ast: true,
+      code: true,
+    });
 
-  // write the ast to a file (temporary)
-  fs.writeFileSync('../data/data.json', JSON.stringify(ast, null, 2));
+    // write the ast to a file (temporary)
+    fs.writeFileSync(
+      PATH.resolve(__dirname, '../data/data.json'),
+      JSON.stringify(ast, null, 2),
+    );
+  } catch (err) {
+    console.log(`error while creating ast for dev purposes. error is ${err}`);
+  }
 };
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
 const fileParser = (fileObject, filePath) => {
   // this reads the file so we can parse it
-  const readFile = fs.readFileSync(filePath).toString();
+  let readFile;
+  try {
+    readFile = fs.readFileSync(filePath).toString();
+  } catch (err) {
+    console.log(`Found an error while reading a file to generate the official AST for it: ${err}`);
+  }
 
   // this parses the file into an AST so we can traverse it
-  const parsedFile = parse(readFile, {
-    sourceType: 'module',
-    plugins: [
-      'jsx',
-      'typescript',
-    ],
-  });
+  let parsedFile;
+  try {
+    parsedFile = parse(readFile, {
+      sourceType: 'module',
+      plugins: ['jsx', 'typescript'],
+    });
+  } catch (err) {
+    console.log(`error while creating ast for traversing. error is ${err}`);
+  }
 
   // this allows us to traverse the AST
   const visitor = {
@@ -77,7 +97,7 @@ const fileParser = (fileObject, filePath) => {
 
       // This handles the require statements without any extra details added on to the require invocation
       // (like a '.default' or settings object)
-      if (node.declarations[0].init) {
+      if (node.declarations && node.declarations[0].init) {
         // We'll handle imports assigned to variables here
         // for example var promise = import("module-name");
         try {
@@ -157,224 +177,75 @@ const fileParser = (fileObject, filePath) => {
       }
     },
 
-    // This handles import statements
-    ImportDeclaration({ node }) {
-      const variableSet = [];
-
-      for (let i = 0; i < node.specifiers.length; i += 1) {
-        const variable = {};
-        const current = node.specifiers[i];
-        variable.name = current.local.name;
-
-        // for when we select specific things to bring in
-        if (current.type === 'ImportSpecifier') {
-          variable.type = 'original name';
-          variable.originalName = variable.name;
-        } else if (current.type === 'ImportDefaultSpecifier') {
-          // if we only import one variable and it's not destructured
-          variable.type = 'local name';
-        } else if (current.type === 'ImportNamespaceSpecifier') {
-          variable.type = 'local name';
-          variable.originalName = '*';
-        }
-
-        // if we know the original name because we're using an alias, add it
-        if (current.imported && current.imported.name) {
-          variable.originalName = current.imported.name;
-        } else if (!variable.originalName) {
-          variable.originalName = 'unknown';
-        }
-
-        variableSet.push(variable);
-      }
-
-      const fileName = node.source.value.trim();
-      let fileType;
-      if (fileName.charAt(0) === '.') {
-        fileType = 'local module';
-      } else {
-        fileType = 'node module';
-      }
-      const methodUsed = 'import';
-
-
-      transform.import(fileObject, fileName, fileType, methodUsed, variableSet);
-    },
-
-    ExportNamedDeclaration({ node }) {
-      console.log('found a named export. node is ', node);
-      if (node.declaration) {
-        // for function declarations being exported
-        if (node.declaration.type === 'FunctionDeclaration') {
-          const originalName = node.declaration.id.name;
-          const exportName = originalName;
-          const value = generate(node.declaration).code || 'unknown';
-          const type = 'named export';
-          let exportSource = 'current file';
-          if (node.source) {
-            exportSource = node.source.value;
-          }
-          transform.export(fileObject, originalName, exportName, value, type, exportSource);
-        }
-
-        // for class declarations being exported
-        if (node.declaration.type === 'ClassDeclaration') {
-          console.log('found a class declaration');
-          const originalName = node.declaration.id.name;
-          const exportName = originalName;
-          const value = generate(node.declaration).code || 'unknown';
-          const type = 'named export';
-          let exportSource = 'current file';
-          if (node.source) {
-            exportSource = node.source.value;
-          }
-          transform.export(fileObject, originalName, exportName, value, type, exportSource);
-        }
-
-        // for variable declarations being exported
-        if (node.declaration.declarations) {
-          for (let i = 0; i < node.declaration.declarations.length; i += 1) {
-            const originalName = node.declaration.declarations[i].id.name;
-            const exportName = originalName;
-            // default value
-            let value = 'unknown';
-            // if we can get it though, set it here
-            if (node.declaration.declarations[i].init) {
-              value = node.declaration.declarations[i].init.name;
-            }
-            const type = 'named export';
-            let exportSource = 'current file';
-            if (node.source) {
-              exportSource = node.source.value;
-            }
-            transform.export(fileObject, originalName, exportName, value, type, exportSource);
-          }
-        }
-      }
-
-      // for object exports with variables passed in to build the object
-      if (node.specifiers) {
-        for (let i = 0; i < node.specifiers.length; i += 1) {
-          const originalName = node.specifiers[i].local.name;
-          let exportName = originalName;
-          let type = 'named export';
-          if (node.specifiers[i].exported.name === 'default') {
-            type = 'default export';
-          } else if (node.specifiers[i].exported.name) {
-            exportName = node.specifiers[i].exported.name;
-          }
-          const value = 'unknown';
-          let exportSource = 'current file';
-          if (node.source) {
-            exportSource = node.source.value;
-          }
-          transform.export(fileObject, originalName, exportName, value, type, exportSource);
-        }
-      }
-    },
-
-    ExportDefaultDeclaration({ node }) {
-      console.log('found a default export. node is ', node);
-      if (node.declaration) {
-        // for simple default exports with a variable name
-        if (node.declaration.type === 'Identifier') {
-          const originalName = node.declaration.name;
-          const exportName = originalName;
-          const value = 'unknown';
-          const type = 'default export';
-          const exportSource = 'current file';
-          transform.export(fileObject, originalName, exportName, value, type, exportSource);
-        }
-        // for default exports that are function definitions
-        if (node.declaration.type === 'FunctionDeclaration') {
-          let originalName = 'anonymous';
-          if (node.declaration.id) {
-            originalName = node.declaration.id.name;
-          }
-          const exportName = originalName;
-          const value = generate(node.declaration).code || 'unknown';
-          const type = 'default export';
-          const exportSource = 'current file';
-          transform.export(fileObject, originalName, exportName, value, type, exportSource);
-        }
-
-        // for class declarations being exported
-        if (node.declaration.type === 'ClassDeclaration') {
-          console.log('found a class declaration');
-          const originalName = node.declaration.id.name || 'anonymous';
-          const exportName = originalName;
-          const value = generate(node.declaration).code || 'unknown';
-          const type = 'default export';
-          const exportSource = 'current file';
-          transform.export(fileObject, originalName, exportName, value, type, exportSource);
-        }
-      } else {
-        console.log('found a default export we couldn\'t process');
-      }
-    },
-
-    ExportAllDeclaration({ node }) {
-      console.log('found an export all. node is ', node);
-      const originalName = '*';
-      const exportName = originalName;
-      const value = 'unknown';
-      const type = 'export all';
-      let exportSource = 'current file';
-      if (node.source) {
-        exportSource = node.source.value;
-      }
-      transform.export(fileObject, originalName, exportName, value, type, exportSource);
-    },
-
     // This handles class methods
     ExpressionStatement({ node }) {
-      if (node.expression.right && node.expression.left) {
-        const type = node.expression.right.type;
-        if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') {
-          const name = `${node.expression.left.object.name}.${node.expression.left.property.name}` || 'anonymousMethod';
-          const params = node.expression.right.params || [];
-          const async = node.expression.right.async;
-          const method = true;
-          const definition = generate(node).code;
-          transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+      try {
+        if (node.expression.right && node.expression.left) {
+          const { type } = node.expression.right;
+          if (
+            type === 'ArrowFunctionExpression' ||
+            type === 'FunctionExpression'
+          ) {
+            const name =
+              `${node.expression.left.object.name}.${node.expression.left.property.name}` ||
+              'anonymousMethod';
+            const params = node.expression.right.params || [];
+            const { async } = node.expression.right;
+            const method = true;
+            const definition = generate(node).code;
+            transform.functionDefinition(
+              fileObject,
+              name,
+              params,
+              async,
+              type,
+              method,
+              definition
+            );
+          }
         }
+      } catch (err) {
+        console.log(`Found an error while parsing a class method: ${err}`);
       }
 
       // this handles module exports
-      if (node.expression.type === 'AssignmentExpression' && node.expression.left && node.expression.left.object) {
-        if (node.expression.left.object && node.expression.left.object.name === 'module' && node.expression.left.property && node.expression.left.property.name === 'exports') {
-          console.log(`looking at assignment expression for ${JSON.stringify(node)}`);
-          let originalName = 'anonymous';
-          let exportName = originalName;
-          // in the case that we're creating an object to export things in
-          if (node.expression.right.type === 'ObjectExpression') {
-            for (let i = 0; i < node.expression.right.properties.length; i += 1) {
-              const current = node.expression.right.properties[i];
-              originalName = current.value.name;
-              exportName = current.key.name;
+      try {
+        if (node.expression.type === 'AssignmentExpression' && node.expression.left && node.expression.left.object) {
+          if (node.expression.left.object && node.expression.left.object.name === 'module' && node.expression.left.property && node.expression.left.property.name === 'exports') {
+            let originalName = 'anonymous';
+            let exportName = originalName;
+            // in the case that we're creating an object to export things in
+            if (node.expression.right.type === 'ObjectExpression') {
+              for (let i = 0; i < node.expression.right.properties.length; i += 1) {
+                const current = node.expression.right.properties[i];
+                originalName = current.value.name;
+                exportName = current.key.name;
+                const value = 'unknown';
+                const type = 'module export';
+                let exportSource = 'current file';
+                if (node.source) {
+                  exportSource = node.source.value;
+                }
+                // in this case we have to loop through the object to get all the exports
+                transform.export(fileObject, originalName, exportName, value, type, exportSource);
+              }
+            } else { // in the case that we have a simple named export
+              if (node.expression.right && node.expression.right.name) {
+                originalName = node.expression.right.name;
+              }
+              exportName = originalName;
               const value = 'unknown';
               const type = 'module export';
               let exportSource = 'current file';
               if (node.source) {
                 exportSource = node.source.value;
               }
-              // in this case we have to loop through the object to get all the exports
               transform.export(fileObject, originalName, exportName, value, type, exportSource);
             }
-          } else { // in the case that we have a simple named export
-            if (node.expression.right && node.expression.right.name) {
-              originalName = node.expression.right.name;
-            }
-            exportName = originalName;
-            const value = 'unknown';
-            const type = 'module export';
-            let exportSource = 'current file';
-            if (node.source) {
-              exportSource = node.source.value;
-            }
-            transform.export(fileObject, originalName, exportName, value, type, exportSource);
           }
         }
+      } catch (err) {
+        console.log(`Found an error while parsing a module export: ${err}`);
       }
     },
 
@@ -382,64 +253,84 @@ const fileParser = (fileObject, filePath) => {
     FunctionExpression(path) {
       const { node } = path;
       // ignore any that are assignment expressions because they are handled in the above Expression Statement block
-      if (path.parent.type !== 'AssignmentExpression') {
-        let name;
-        if (node.id) {
-          name = node.id.name;
-        } else {
-          name = 'anonymousFunction';
+      try {
+        if (path.parent.type !== 'AssignmentExpression') {
+          let name;
+          if (node.id) {
+            name = node.id.name;
+          } else {
+            name = 'anonymousFunction';
+          }
+          const params = node.params || [];
+          const { async } = node;
+          const { type } = node;
+          const method = false;
+          const definition = generate(node).code;
+          transform.functionDefinition(
+            fileObject,
+            name,
+            params,
+            async,
+            type,
+            method,
+            definition
+          );
         }
-        const params = node.params || [];
-        const async = node.async;
-        const type = node.type;
-        const method = false;
-        const definition = generate(node).code;
-        transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+      } catch (err) {
+        console.log(`Found an error while parsing a function defined inside an iffy: ${err}`);
       }
     },
 
     // for outer function calls
-    CallExpression(path) {
-      // destructuring node from the path
-      const { node } = path;
-
+    CallExpression({ node }) {
       let name;
       let type;
-      // we'll grab the name of the function being called
-      // for regular functions
-      if (node.callee.type !== 'Import') {
-        if (node.callee && node.callee.name) {
-          // handling all regular function calls except require statements here
-          if (node.callee.name !== 'require') {
-            name = node.callee.name;
-            type = 'function';
-          }
-        } else if (node.callee.object && node.callee.object.name) {
-          // for regular class methods
-          name = `${node.callee.object.name}.${node.callee.property.name}`;
-          type = 'method';
-        } else if (node.callee.object && node.callee.object.object && node.callee.object.property && node.callee.object.object.name && node.callee.object.property.name) {
-          // for methods called on object properties
-          name = `${node.callee.object.object.name}.${node.callee.object.property.name}.${node.callee.property.name}`;
-          type = 'method';
-        } else if (node.callee.property && node.callee.property.name) {
-          // and for class/prototype methods we can't identify the object of
-          name = `anonymous.${node.callee.property.name}`;
-          type = 'anonymous method';
-        } else if (node.callee && node.callee.id && node.callee.id.name) {
-          name = node.callee.id.name;
-          type = 'immediately invoked function expression';
-        } else {
-          name = 'anonymous';
-          type = 'anonymous function';
-        }
-        // grab the arguments (this will be an empty array if no arguments are there)
-        // we should revisit this because we should be handling the node logic here instead
-        // or actually... perhaps this is how we should be handling all the node visitor patterns
-        // and letting transform do the parsing out of the details for each thing
-        const args = node.arguments;
 
-        transform.functionCall(fileObject, name, type, args);
+      // for regular functions
+      try {
+        if (node.callee.type !== 'Import') {
+          if (node.callee && node.callee.name) {
+            // handling all regular function calls except require statements here
+            if (node.callee.name) {
+              name = node.callee.name;
+              type = 'function';
+            }
+          } else if (node.callee.object && node.callee.object.name) {
+            // for regular class methods
+            name = `${node.callee.object.name}.${node.callee.property.name}`;
+            type = 'method';
+          } else if (
+            node.callee.object &&
+            node.callee.object.object &&
+            node.callee.object.property &&
+            node.callee.object.object.name &&
+            node.callee.object.property.name
+          ) {
+            // for methods called on object properties
+            name = `${node.callee.object.object.name}.${node.callee.object.property.name}.${node.callee.property.name}`;
+            type = 'method';
+          } else if (node.callee.property && node.callee.property.name) {
+            // and for class/prototype methods we can't identify the object of
+            name = `anonymous.${node.callee.property.name}`;
+            type = 'anonymous method';
+          } else if (node.callee && node.callee.id && node.callee.id.name) {
+            name = node.callee.id.name;
+            type = 'immediately invoked function expression';
+          } else {
+            name = 'anonymous';
+            type = 'anonymous function';
+          }
+          // grab the arguments (this will be an empty array if no arguments are there)
+          // we should revisit this because we should be handling the node logic here instead
+          // or actually... perhaps this is how we should be handling all the node visitor patterns
+          // and letting transform do the parsing out of the details for each thing
+
+          const args = node.arguments;
+
+          transform.functionCall(fileObject, name, type, args);
+        }
+      } catch (err) {
+        console.log(`Found an error while trying to get the name, type, and args of a regular function or method call that is not an import statement: ${err}`);
       }
 
       // or if object type is call expression, then it's in a chain of methods, so we won't have the object name but we still get the method name
@@ -454,6 +345,214 @@ const fileParser = (fileObject, filePath) => {
       //   console.log(`path.parent.type is MemberExpression for the node: ${JSON.stringify(path.node)}`);
       // }
     },
+
+    // This handles import statements
+    ImportDeclaration({ node }) {
+      const variableSet = [];
+
+      try {
+        if (node.specifiers) {
+          for (let i = 0; i < node.specifiers.length; i += 1) {
+            const variable = {};
+            const current = node.specifiers[i];
+            variable.name = current.local.name;
+
+            // for when we select specific things to bring in
+            if (current.type === 'ImportSpecifier') {
+              variable.type = 'original name';
+              variable.originalName = variable.name;
+            } else if (current.type === 'ImportDefaultSpecifier') {
+              // if we only import one variable and it's not destructured
+              variable.type = 'local name';
+            } else if (current.type === 'ImportNamespaceSpecifier') {
+              variable.type = 'local name';
+              variable.originalName = '*';
+            }
+
+            // if we know the original name because we're using an alias, add it
+            if (current.imported && current.imported.name) {
+              variable.originalName = current.imported.name;
+            } else if (!variable.originalName) {
+              variable.originalName = 'unknown';
+            }
+
+            variableSet.push(variable);
+          }
+          const fileName = node.source.value.trim();
+          let fileType;
+          if (fileName.charAt(0) === '.') {
+            fileType = 'local module';
+          } else {
+            fileType = 'node module';
+          }
+          const methodUsed = 'import';
+
+          transform.import(
+            fileObject,
+            fileName,
+            fileType,
+            methodUsed,
+            variableSet,
+          );
+        }
+      } catch (err) {
+        console.log(`Found an error while parsing an import declaration node: ${err}`);
+      }
+    },
+
+    ExportNamedDeclaration({ node }) {
+      if (node.declaration) {
+        // for function declarations being exported
+        try {
+          if (node.declaration.type === 'FunctionDeclaration') {
+            const originalName = node.declaration.id.name;
+            const exportName = originalName;
+            const value = generate(node.declaration).code || 'unknown';
+            const type = 'named export';
+            let exportSource = 'current file';
+            if (node.source) {
+              exportSource = node.source.value;
+            }
+            transform.export(fileObject, originalName, exportName, value, type, exportSource);
+          }
+        } catch (err) {
+          console.log(`Found an error while parsing a function declaration export: ${err}`);
+        }
+
+        // for class declarations being exported
+        try {
+          if (node.declaration.type === 'ClassDeclaration') {
+            const originalName = node.declaration.id.name;
+            const exportName = originalName;
+            const value = generate(node.declaration).code || 'unknown';
+            const type = 'named export';
+            let exportSource = 'current file';
+            if (node.source) {
+              exportSource = node.source.value;
+            }
+            transform.export(fileObject, originalName, exportName, value, type, exportSource);
+          }
+        } catch (err) {
+          console.log(`Found an error while parsing a class declaration export: ${err}`);
+        }
+
+        // for variable declarations being exported
+        try {
+          if (node.declaration.declarations) {
+            for (let i = 0; i < node.declaration.declarations.length; i += 1) {
+              const originalName = node.declaration.declarations[i].id.name;
+              const exportName = originalName;
+              // default value
+              let value = 'unknown';
+              // if we can get it though, set it here
+              if (node.declaration.declarations[i].init) {
+                value = node.declaration.declarations[i].init.name;
+              }
+              const type = 'named export';
+              let exportSource = 'current file';
+              if (node.source) {
+                exportSource = node.source.value;
+              }
+              transform.export(fileObject, originalName, exportName, value, type, exportSource);
+            }
+          }
+        } catch (err) {
+          console.log(`Found an error while parsing a variable declaration export: ${err}`);
+        }
+      }
+
+      // for object exports with variables passed in to build the object
+      try {
+        if (node.specifiers) {
+          for (let i = 0; i < node.specifiers.length; i += 1) {
+            const originalName = node.specifiers[i].local.name;
+            let exportName = originalName;
+            let type = 'named export';
+            if (node.specifiers[i].exported.name === 'default') {
+              type = 'default export';
+            } else if (node.specifiers[i].exported.name) {
+              exportName = node.specifiers[i].exported.name;
+            }
+            const value = 'unknown';
+            let exportSource = 'current file';
+            if (node.source) {
+              exportSource = node.source.value;
+            }
+            transform.export(fileObject, originalName, exportName, value, type, exportSource);
+          }
+        }
+      } catch (err) {
+        console.log(`Found an error while parsing an object export with variables passed in to build the object: ${err}`);
+      }
+    },
+
+    ExportDefaultDeclaration({ node }) {
+      if (node.declaration) {
+
+        // for simple default exports with a variable name
+        try {
+          if (node.declaration.type === 'Identifier') {
+            const originalName = node.declaration.name;
+            const exportName = originalName;
+            const value = 'unknown';
+            const type = 'default export';
+            const exportSource = 'current file';
+            transform.export(fileObject, originalName, exportName, value, type, exportSource);
+          }
+        } catch (err) {
+          console.log(`Found an error while parsing a default export with a variable name: ${err}`);
+        }
+
+        // for default exports that are function definitions
+        try {
+          if (node.declaration.type === 'FunctionDeclaration') {
+            let originalName = 'anonymous';
+            if (node.declaration.id) {
+              originalName = node.declaration.id.name;
+            }
+            const exportName = originalName;
+            const value = generate(node.declaration).code || 'unknown';
+            const type = 'default export';
+            const exportSource = 'current file';
+            transform.export(fileObject, originalName, exportName, value, type, exportSource);
+          }
+        } catch (err) {
+          console.log(`Found an error while parsing a function definition as a default export: ${err}`);
+        }
+
+        // for default exports that are class declarations
+        try {
+          if (node.declaration.type === 'ClassDeclaration') {
+            const originalName = node.declaration.id.name || 'anonymous';
+            const exportName = originalName;
+            const value = generate(node.declaration).code || 'unknown';
+            const type = 'default export';
+            const exportSource = 'current file';
+            transform.export(fileObject, originalName, exportName, value, type, exportSource);
+          }
+        } catch (err) {
+          console.log(`Found an error while parsing a class declaration as a default export: ${err}`);
+        }
+      } else {
+        console.log('found a default export we couldn\'t process');
+      }
+    },
+
+    ExportAllDeclaration({ node }) {
+      try {
+        const originalName = '*';
+        const exportName = originalName;
+        const value = 'unknown';
+        const type = 'export all';
+        let exportSource = 'current file';
+        if (node.source) {
+          exportSource = node.source.value;
+        }
+        transform.export(fileObject, originalName, exportName, value, type, exportSource);
+      } catch (err) {
+        console.log(`Found an error while parsing an export all declaration node: ${err}`);
+      }
+    },
   };
 
   // this traverses the AST (parsedFile) using the visitor object to determine what to do with the AST
@@ -465,7 +564,7 @@ const fileParser = (fileObject, filePath) => {
 
 // this is just an easy wrapper for calling both of the above functions.
 // later we can just export the fileParser and delete all the AST stuff
-const parser = fileObject => {
+const parser = (fileObject) => {
   const filePath = fileObject.fullname;
   createAST(filePath);
   fileParser(fileObject, filePath);
