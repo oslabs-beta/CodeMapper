@@ -36,7 +36,7 @@ transform.functionDefinition = (
   // add whether it's a class method or not
   functionInfo.method = method;
 
-  // check for the arguments and add them to an array
+  // check for the parameters and add them to an array
   if (params.length) {
     functionInfo.parameters = [];
     for (let i = 0; i < params.length; i += 1) {
@@ -48,6 +48,8 @@ transform.functionDefinition = (
         functionInfo.parameters.push(
           `${params[i].left.name} = ${JSON.stringify(params[i].right.elements)}`
         );
+      } else {
+        functionInfo.parameters.push(JSON.stringify(generate(params[i]).code));
       }
     }
   }
@@ -188,6 +190,12 @@ transform.functionCall = (fileObject, name, type, args) => {
         } else {
           label = arg.value;
         }
+      } else if (arg.type === 'NullLiteral') {
+        label = 'null';
+      } else if (arg.type === 'NumericLiteral') {
+        label = arg.value;
+      } else if (arg.type === 'TemplateLiteral') {
+        label = JSON.stringify(generate(args[i]).code);
       } else if (arg.callee && arg.callee.name) {
         label = arg.callee.name;
       } else if (arg.name) {
@@ -237,6 +245,23 @@ transform.functionCall = (fileObject, name, type, args) => {
         // console.log('got into logical expression for arg ', arg);
         // call helper function
         label = handleLogicalExpressions(arg);
+      } else if (arg.type === 'CallExpression') {
+        if (arg.callee && arg.callee.name) {
+          label = arg.callee.name;
+        } else if (arg.callee.object && arg.callee.property) {
+          if (args.arguments) {
+            // grab the inner arguments
+            const innerArgs = [];
+            for (let j = 0; i < args.arguments.length; j += 1) {
+              innerArgs.push(JSON.stringify(generate(innerArgs[j]).code));
+            }
+            label = `${arg.callee.object.name}.${arg.callee.property.name}(${innerArgs.slice(1, -1)})`;
+          } else {
+            label = `${arg.callee.object.name}.${arg.callee.property.name}()`;
+          }
+        }
+      } else if (arg.type === 'MemberExpression') {
+        label = JSON.stringify(generate(args[i]).code);
       }
       functionInfo.arguments.push(label || argObject);
     }
@@ -267,12 +292,12 @@ transform.functionCall = (fileObject, name, type, args) => {
   //  }
 };
 
-transform.imported = (
+transform.import = (
   fileObject,
   fileName,
   fileType,
   methodUsed,
-  variableSet
+  variableSet,
 ) => {
   const importInfo = {};
 
@@ -297,9 +322,18 @@ transform.imported = (
   // we could also check if it's being used?
 };
 
-transform.export = (path, fileObject) => {
-  // name
-  // default: true or false
+transform.export = (fileObject, originalName, exportName, value, type, exportSource) => {
+  const exportInfo = {};
+  exportInfo.originalName = originalName;
+  exportInfo.exportName = exportName;
+  exportInfo.value = value;
+  exportInfo.type = type;
+  exportInfo.exportSource = exportSource;
+  // and then add it into the file tree
+  if (!fileObject.exports) {
+    fileObject.exported = [];
+  }
+  fileObject.exported.push(exportInfo);
 };
 
 module.exports = { transform };

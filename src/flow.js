@@ -30,14 +30,14 @@ async function flow(root, include, exclude) {
       // create foamTree data for browser project tree data visualization
       writeFoamTreeData(fileTree);
 
-      console.log(
-        '\x1b[32m',
-        'All done! look in data/finalTree.json to see the current result.\x1b[37m'
-      );
+      // console.log(
+      //   '\x1b[32m',
+      //   'All done! look in data/finalTree.json to see the current result.\x1b[37m'
+      // );
     }
   } catch (err) {
-    console.error(
-      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`
+    console.log(
+      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err}\x1b[37m`
     );
   }
 
