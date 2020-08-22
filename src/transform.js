@@ -272,9 +272,18 @@ transform.import = (fileObject, fileName, fileType, methodUsed, variableSet) => 
   // we could also check if it's being used?
 };
 
-transform.export = (path, fileObject) => {
-  // name
-  // default: true or false
+transform.export = (fileObject, originalName, exportName, value, type, exportSource) => {
+  const exportInfo = {};
+  exportInfo.originalName = originalName;
+  exportInfo.exportName = exportName;
+  exportInfo.value = value;
+  exportInfo.type = type;
+  exportInfo.exportSource = exportSource;
+  // and then add it into the file tree
+  if (!fileObject.exports) {
+    fileObject.exports = [];
+  }
+  fileObject.exports.push(exportInfo);
 };
 
 module.exports = { transform };
