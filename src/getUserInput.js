@@ -20,8 +20,8 @@ const excludeArr = [
   'package-lock.json',
   'yarn.lock',
   '.md',
-  'app.js',
   'foamtree.js',
+  'foamTreeDataObj.js',
 ];
 
 // set default root path to the same level as this file's folder
@@ -89,7 +89,7 @@ function rootDirOption() {
     if (userInput === 'm') {
       rl.close();
       console.log(
-        '\x1b[32m\n CodeMapper Activated and Processing this directory with defaults 📁 🚀...\x1b[37m'
+        '\x1b[32m\n CodeMapper Launched and Processing this directory with defaults 📁 🚀...\x1b[37m'
       );
       return flow(rootDir, includeArr, excludeArr);
     }
