@@ -4,23 +4,27 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/getUserInput.js",
+    "start": "node src/getUserInput.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BeckettH/CodeMapper.git"
+    "url": "git+https://github.com/oslabs-beta/CodeMapper.git"
   },
   "author": "RabbitHole",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/BeckettH/CodeMapper/issues"
+    "url": "https://github.com/oslabs-beta/CodeMapper/issues"
   },
-  "homepage": "https://github.com/BeckettH/CodeMapper#readme",
+  "homepage": "https://github.com/oslabs-beta/CodeMapper#readme",
   "dependencies": {
     "@babel/core": "^7.11.0",
     "@babel/generator": "^7.11.0",
     "@babel/parser": "^7.11.0",
+    "@babel/preset-env": "^7.11.0",
+    "@babel/preset-flow": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
+    "@babel/preset-typescript": "^7.10.4",
     "@babel/traverse": "^7.11.0",
     "@nodelib/fs.walk": "^1.2.4",
     "fs": "0.0.1-security",

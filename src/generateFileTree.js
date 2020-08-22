@@ -48,16 +48,6 @@ async function generateTree(rootPath, include = [], exclude = []) {
   if (fileTree.error) {
     console.error(fileTree.error);
   } else {
-    // otherwise, write the file to fileTree.json with basic formatting (temporary for dev use)// create a data file if it doesn't exist
-    const dataFile = PATH.resolve(__dirname, '../data');
-    if (!fs.existsSync(dataFile)) fs.mkdirSync(dataFile);
-
-    fs.writeFile(PATH.resolve(__dirname, '../data/fileTree.json'), JSON.stringify(fileTree, null, 2), err => {
-      if (err) console.error(`There was an error writing tree data to the file: ${err}`);
-
-      console.log(JSON.stringify(fileTree, null, 2));
-    });
-
     // and return the filetree
     return fileTree;
   }
