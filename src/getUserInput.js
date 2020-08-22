@@ -20,7 +20,8 @@ const excludeArr = [
   'package-lock.json',
   'yarn.lock',
   '.md',
-  'visualization',
+  'app.js',
+  'foamtree.js',
 ];
 
 // set default root path to the same level as this file's folder

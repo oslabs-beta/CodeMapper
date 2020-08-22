@@ -82,46 +82,66 @@ window.addEventListener('load', () => {
 
         console.log(data);
         const html = ejs.render(
-          `
+          ` <h3>
+          <%= data.label %>
+          </h3>
           <% if (data.imported) { %>
-            <h3>Imports</h3>
+            <h4>Imports</h4>
             <ul>
               <% data.imported.forEach((obj)=>{ %>
-                <li>
+                <li class="pink">
                   <%= obj.fileName %>
                 </li>
                 <% }) %>
             </ul>
           <% } %>
+    
           <% if (data.functionDeclarations) { %>
-            <h3>Function Declarations</h3>
+            <h4>Function Declarations</h4>
             <ul>
               <% data.functionDeclarations.forEach((obj)=>{ %>
-                <li>
+                <li class="blue">
                   <%= obj.name %>
-                 
+                 <span>
                   (
                   <%= obj.parameters %>
                   )
+                  </span>
                 </li>
                 <% }) %>
             </ul>
           <% } %>
-          
+
           <% if (data.functionCalls) { %>
-            <h3>Function Calls</h3>
+
+            <h4>Function Calls</h4>
             <ul>
               <% data.functionCalls.forEach((obj)=>{ %>
-                <li>
+                <li class="green">
                   <%= obj.name %>
+                  <span>
                     (
-                      <%= JSON.stringify(obj.arguments, null, 2)%>
+                      <% obj.arguments.forEach((el)=>{ %>
+                        <%  console.log(el) %>
 
+                        <% if( el === null ) { 'null'  %>
+
+                          <% } else if (typeof el === 'object') { %>
+                            
+                            <%= el.callbackName %> 
+                            
+                          
+                            <% } else {%>
+                              <%= el %>
+                              <% } %>
+                          <% }) %>
+                        
                     )
+                    </span>
                 </li>
-                <% }) %>
+                <% }); %>
             </ul>
-          <% } % >
+          <% } %>
           
           
           
@@ -133,11 +153,18 @@ window.addEventListener('load', () => {
           { data: data }
         );
         document.getElementById('details').innerHTML = html;
+        document.getElementById('details').classList.add('opened');
         // console.log(JSON.stringify(details, null, 2));
 
         // if (event.group.unselectable) {
         //   event.preventDefault();
         // }
+
+        const closeBtn = document.getElementById('container');
+        // .addEventListener('click', function (evt) {
+        //   console.log(evt);
+        // });
+        console.log(closeBtn);
       },
     });
     foamtree.redraw();
