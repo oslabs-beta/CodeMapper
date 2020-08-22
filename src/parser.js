@@ -7,7 +7,7 @@ const PATH = require('path');
 const { transform } = require('./transform');
 
 // this function is only for dev and can be removed for production
-const createAST = filePath => {
+const createAST = (filePath) => {
   // this gets used by transformSync to generate our AST (only used in dev)
   const source = fs.readFileSync(filePath, 'utf8');
 
@@ -19,7 +19,10 @@ const createAST = filePath => {
   });
 
   // write the ast to a file (temporary)
-  fs.writeFileSync(PATH.resolve(__dirname, '../data/data.json'), JSON.stringify(ast, null, 2));
+  fs.writeFileSync(
+    PATH.resolve(__dirname, '../data/data.json'),
+    JSON.stringify(ast, null, 2)
+  );
 };
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
@@ -30,10 +33,7 @@ const fileParser = (fileObject, filePath) => {
   // this parses the file into an AST so we can traverse it
   const parsedFile = parse(readFile, {
     sourceType: 'module',
-    plugins: [
-      'jsx',
-      'typescript',
-    ],
+    plugins: ['jsx', 'typescript'],
   });
 
   // this allows us to traverse the AST
@@ -51,26 +51,48 @@ const fileParser = (fileObject, filePath) => {
       const method = false;
       const definition = generate(node).code;
 
-      transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+      transform.functionDefinition(
+        fileObject,
+        name,
+        params,
+        async,
+        type,
+        method,
+        definition
+      );
     },
 
     VariableDeclaration({ node }) {
       // This handles the arrow functions
-      if (node.declarations[0].init && node.declarations[0].init.type === 'ArrowFunctionExpression') {
+      if (
+        node.declarations[0].init &&
+        node.declarations[0].init.type === 'ArrowFunctionExpression'
+      ) {
         const { name } = node.declarations[0].id;
         const params = node.declarations[0].init.params || [];
         const { async } = node.declarations[0].init;
         const { type } = node.declarations[0].init;
         const method = false;
         const definition = generate(node).code;
-        transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+        transform.functionDefinition(
+          fileObject,
+          name,
+          params,
+          async,
+          type,
+          method,
+          definition
+        );
       }
 
       // This handles the require statements without any extra details added on to the require invocation (like a '.default' or settings object)
       if (node.declarations[0].init) {
         // We'll handle imports assigned to variables here
         // for example var promise = import("module-name");
-        if (node.declarations[0].init.callee && node.declarations[0].init.callee.type === 'Import') {
+        if (
+          node.declarations[0].init.callee &&
+          node.declarations[0].init.callee.type === 'Import'
+        ) {
           const variable = {};
           const variableSet = [];
           variable.name = node.declarations[0].id.name;
@@ -88,10 +110,22 @@ const fileParser = (fileObject, filePath) => {
 
           const methodUsed = 'dynamic import';
 
-          transform.import(fileObject, fileName, fileType, methodUsed, variableSet);
+          transform.imported(
+            fileObject,
+            fileName,
+            fileType,
+            methodUsed,
+            variableSet
+          );
         }
 
-        if ((node.declarations[0].init.type === 'CallExpression' && node.declarations[0].init.callee.name === 'require') || (node.declarations[0].init.type === 'MemberExpression' && node.declarations[0].init.object.callee && node.declarations[0].init.object.callee.name === 'require')) {
+        if (
+          (node.declarations[0].init.type === 'CallExpression' &&
+            node.declarations[0].init.callee.name === 'require') ||
+          (node.declarations[0].init.type === 'MemberExpression' &&
+            node.declarations[0].init.object.callee &&
+            node.declarations[0].init.object.callee.name === 'require')
+        ) {
           const variableSet = [];
 
           // when we're naming the default we're bringing in
@@ -104,8 +138,15 @@ const fileParser = (fileObject, filePath) => {
 
           // for when we destructure the things we're importing
           // when we're destructuring a specific thing we're importing
-          if (node.declarations[0].id.type === 'ObjectPattern' && node.declarations[0].id.properties.length) {
-            for (let i = 0; i < node.declarations[0].id.properties.length; i += 1) {
+          if (
+            node.declarations[0].id.type === 'ObjectPattern' &&
+            node.declarations[0].id.properties.length
+          ) {
+            for (
+              let i = 0;
+              i < node.declarations[0].id.properties.length;
+              i += 1
+            ) {
               const variable = {};
               variable.name = node.declarations[0].id.properties[i].value.name;
               variable.type = 'original name';
@@ -134,7 +175,13 @@ const fileParser = (fileObject, filePath) => {
 
           // console.log(`file name is ${fileName} and file type is ${fileType} and method used is ${methodUsed} and variable set looks like ${JSON.stringify(variableSet)}`);
 
-          transform.import(fileObject, fileName, fileType, methodUsed, variableSet);
+          transform.imported(
+            fileObject,
+            fileName,
+            fileType,
+            methodUsed,
+            variableSet
+          );
         }
       }
     },
@@ -179,8 +226,13 @@ const fileParser = (fileObject, filePath) => {
       }
       const methodUsed = 'import';
 
-
-      transform.import(fileObject, fileName, fileType, methodUsed, variableSet);
+      transform.imported(
+        fileObject,
+        fileName,
+        fileType,
+        methodUsed,
+        variableSet
+      );
     },
 
     ExportNamedDeclaration({ node }) {
@@ -190,7 +242,8 @@ const fileParser = (fileObject, filePath) => {
       for (let i = 0; i < node.declaration.declarations.length; i += 1) {
         const variable = {};
         variable.name = node.declaration.declarations[i].id.name;
-        variable.value = node.declaration.declarations[i].init.name || 'unknown';
+        variable.value =
+          node.declaration.declarations[i].init.name || 'unknown';
         variableSet.push(variable);
       }
 
@@ -202,9 +255,7 @@ const fileParser = (fileObject, filePath) => {
       }
     },
 
-    ExportDefaultDeclaration({ node }) {
-
-    },
+    ExportDefaultDeclaration({ node }) {},
 
     ExportAllDeclaration({ node }) {
       const exportSource = node.source.value;
@@ -215,17 +266,32 @@ const fileParser = (fileObject, filePath) => {
       try {
         if (node.expression.right && node.expression.left) {
           const { type } = node.expression.right;
-          if (type === 'ArrowFunctionExpression' || type === 'FunctionExpression') {
-            const name = `${node.expression.left.object.name}.${node.expression.left.property.name}` || 'anonymousMethod';
+          if (
+            type === 'ArrowFunctionExpression' ||
+            type === 'FunctionExpression'
+          ) {
+            const name =
+              `${node.expression.left.object.name}.${node.expression.left.property.name}` ||
+              'anonymousMethod';
             const params = node.expression.right.params || [];
             const { async } = node.expression.right;
             const method = true;
             const definition = generate(node).code;
-            transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+            transform.functionDefinition(
+              fileObject,
+              name,
+              params,
+              async,
+              type,
+              method,
+              definition
+            );
           }
         }
       } catch (err) {
-        console.error('\n\x1b[31m\t=== ERROR MESSAGE ===\x1b[37m\nError in parser.js with the { node } object parameter.');
+        console.error(
+          '\n\x1b[31m\t=== ERROR MESSAGE ===\x1b[37m\nError in parser.js with the { node } object parameter.'
+        );
         console.error(err.message);
         throw new Error(err.message);
       }
@@ -251,7 +317,15 @@ const fileParser = (fileObject, filePath) => {
         const { type } = node;
         const method = false;
         const definition = generate(node).code;
-        transform.functionDefinition(fileObject, name, params, async, type, method, definition);
+        transform.functionDefinition(
+          fileObject,
+          name,
+          params,
+          async,
+          type,
+          method,
+          definition
+        );
       }
     },
 
@@ -275,7 +349,13 @@ const fileParser = (fileObject, filePath) => {
           // for regular class methods
           name = `${node.callee.object.name}.${node.callee.property.name}`;
           type = 'method';
-        } else if (node.callee.object && node.callee.object.object && node.callee.object.property && node.callee.object.object.name && node.callee.object.property.name) {
+        } else if (
+          node.callee.object &&
+          node.callee.object.object &&
+          node.callee.object.property &&
+          node.callee.object.object.name &&
+          node.callee.object.property.name
+        ) {
           // for methods called on object properties
           name = `${node.callee.object.object.name}.${node.callee.object.property.name}.${node.callee.property.name}`;
           type = 'method';
@@ -322,7 +402,7 @@ const fileParser = (fileObject, filePath) => {
 
 // this is just an easy wrapper for calling both of the above functions.
 // later we can just export the fileParser and delete all the AST stuff
-const parser = fileObject => {
+const parser = (fileObject) => {
   const filePath = fileObject.fullname;
   createAST(filePath);
   fileParser(fileObject, filePath);

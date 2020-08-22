@@ -9,7 +9,7 @@ function relativePath(fullPath, depth) {
   // create relative path
   const pathArr = fullPath.split('/');
   const idxToSplice = pathArr.length - depth;
-  const rPath = (depth === 0) ? '/' : `/${pathArr.splice(idxToSplice).join('/')}`;
+  const rPath = depth === 0 ? '/' : `/${pathArr.splice(idxToSplice).join('/')}`;
 
   return rPath;
 }
@@ -17,8 +17,17 @@ function relativePath(fullPath, depth) {
 // add output object properties
 function outputObjProps(obj) {
   const {
-    name, path, depth, size, isDirectory, content,
+    name,
+    path,
+    depth,
+    size,
+    isDirectory,
+    content,
+    functionDeclarations,
+    imported,
+    functionCalls,
   } = obj;
+
   const newObj = {};
 
   if (!isDirectory) {
@@ -28,6 +37,17 @@ function outputObjProps(obj) {
   }
   newObj.rPath = relativePath(path, depth);
   newObj.size = size;
+
+  if (functionDeclarations) {
+    newObj.functionDeclarations = functionDeclarations;
+  }
+  if (imported) {
+    newObj.imported = imported;
+  }
+  if (functionCalls) {
+    newObj.functionCalls = functionCalls;
+  }
+
   // replace content property name with groups
   if (content !== undefined && content.length > 0) {
     newObj.groups = content;
@@ -37,12 +57,27 @@ function outputObjProps(obj) {
 }
 
 function processObj(obj) {
-  // format object
   const {
-    name, path, depth, isDirectory, size, content,
+    name,
+    path,
+    depth,
+    size,
+    isDirectory,
+    content,
+    functionDeclarations,
+    imported,
+    functionCalls,
   } = obj;
   const outputObj = outputObjProps({
-    name, path, depth, isDirectory, size, content,
+    name,
+    path,
+    depth,
+    isDirectory,
+    size,
+    content,
+    functionDeclarations,
+    imported,
+    functionCalls,
   });
 
   return outputObj;
@@ -52,7 +87,7 @@ function processObj(obj) {
 function generateFoamTreeArray(fileTreeArr) {
   const foamTreeArr = [];
 
-  fileTreeArr.forEach(obj => {
+  fileTreeArr.forEach((obj) => {
     let outputObj = processObj(obj);
 
     // does the newly created object have a groups property?
@@ -72,18 +107,25 @@ function generateFoamTreeArray(fileTreeArr) {
 async function writeFoamTreeData(tree) {
   foamTreeData.groups = await generateFoamTreeArray(tree);
 
-// write to the result foam tree object
+  // write to the result foam tree object
   const data = PATH.resolve(__dirname, '../data');
 
   if (!fs.existsSync(data)) {
     fs.mkdirSync(data);
   }
 
-  fs.writeFile(PATH.resolve(__dirname, '../data/foamTreeDataObj.js'), `export default ${JSON.stringify(foamTreeData, null, 2)}`, 'utf8', err => {
-    if (err) throw err;
+  fs.writeFile(
+    PATH.resolve(__dirname, '../data/foamTreeDataObj.js'),
+    `export default ${JSON.stringify(foamTreeData, null, 2)}`,
+    'utf8',
+    (err) => {
+      if (err) throw err;
 
-    console.log('\x1b[32m\n\t*** Data for visualization created ***\n The Project Structure can now be viewed in the browser\x1b[37m\n');
-  });
+      console.log(
+        '\x1b[32m\n\t*** Data for visualization created ***\n The Project Structure can now be viewed in the browser\x1b[37m\n'
+      );
+    }
+  );
 }
 
 module.exports = { writeFoamTreeData };

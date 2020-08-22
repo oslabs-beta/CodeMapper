@@ -20,7 +20,8 @@ const excludeArr = [
   'package-lock.json',
   'yarn.lock',
   '.md',
-  'visualization',
+  'app.js',
+  'foamtree.js',
 ];
 
 // set default root path to the same level as this file's folder
@@ -29,13 +30,15 @@ let rootDir = PATH.resolve(__dirname, '../');
 // modify the include and exclude options based on user input
 // Function creates REPL to push files and folders to options include array
 function addToInclude() {
-  rl.question('Add to include in mapping, or \'m\' to map: ', userInput => {
+  rl.question("Add to include in mapping, or 'm' to map: ", (userInput) => {
     userInput = userInput.trim();
 
     if (userInput === 'q') process.exit();
     if (userInput === 'm') {
       rl.close();
-      console.log('\x1b[32m\n CodeMapper Activated and Processing 📁 🚀...\n\x1b[37m');
+      console.log(
+        '\x1b[32m\n CodeMapper Activated and Processing 📁 🚀...\n\x1b[37m'
+      );
       return flow(rootDir, includeArr, excludeArr);
     }
     includeArr.push(userInput);
@@ -45,13 +48,15 @@ function addToInclude() {
 
 // Function creates REPL to push files and folders to options exclude array
 function addToExclude() {
-  rl.question('Add to exclude from mapping, or \'m\' to map: ', input => {
+  rl.question("Add to exclude from mapping, or 'm' to map: ", (input) => {
     input = input.trim();
 
     if (input === 'q') process.exit();
     if (input === 'm') {
       rl.close();
-      console.log('\x1b[32m\n CodeMapper Activated and Processing 📁 🚀...\n\x1b[37m');
+      console.log(
+        '\x1b[32m\n CodeMapper Activated and Processing 📁 🚀...\n\x1b[37m'
+      );
       return flow(rootDir, includeArr, excludeArr);
     }
     excludeArr.push(input);
@@ -60,8 +65,9 @@ function addToExclude() {
 }
 
 function getUserChoices() {
-  const message = '\nPlease type \'i\' to choose the include option, or type \'e\' for the exclude option: ';
-  rl.question(message, userInput => {
+  const message =
+    "\nPlease type 'i' to choose the include option, or type 'e' for the exclude option: ";
+  rl.question(message, (userInput) => {
     userInput = userInput.trim();
 
     if (userInput === 'q') process.exit();
@@ -74,14 +80,17 @@ function getUserChoices() {
 // Function to create a REPL to get user input through the command line
 function rootDirOption() {
   // need to come up with a general path validation pattern test using regex
-  const message = 'You can set a root directory to start the mapping process, or just hit return \nto stick with this folder as the root path.\n\nYou can also type \'m\' to map this directory with the default excludes: ';
-  rl.question(message, userInput => {
+  const message =
+    "You can set a root directory to start the mapping process, or just hit return \nto stick with this folder as the root path.\n\nYou can also type 'm' to map this directory with the default excludes: ";
+  rl.question(message, (userInput) => {
     userInput = userInput.trim();
 
     if (userInput === 'q') process.exit();
     if (userInput === 'm') {
       rl.close();
-      console.log('\x1b[32m\n CodeMapper Activated and Processing this directory with defaults 📁 🚀...\x1b[37m');
+      console.log(
+        '\x1b[32m\n CodeMapper Activated and Processing this directory with defaults 📁 🚀...\x1b[37m'
+      );
       return flow(rootDir, includeArr, excludeArr);
     }
     if (userInput.length > 0) {
@@ -116,14 +125,17 @@ const greeting = `Welcome to CodeMapper!\n
   Type 'q' to exit the program.
   `;
 
-  // Ask if user wants to clear their console before proceeding
-rl.question('If you like to clear the console before proceeding, enter \'c\': ', userInput => {
-  userInput = userInput.trim();
+// Ask if user wants to clear their console before proceeding
+rl.question(
+  "If you like to clear the console before proceeding, enter 'c': ",
+  (userInput) => {
+    userInput = userInput.trim();
 
-  if (userInput === 'q') return process.exit();
-  if (userInput.toLowerCase() === 'c') process.stdout.write('\x1Bc');
+    if (userInput === 'q') return process.exit();
+    if (userInput.toLowerCase() === 'c') process.stdout.write('\x1Bc');
 
-  console.log(greeting);
+    console.log(greeting);
 
-  return rootDirOption();
-});
+    return rootDirOption();
+  }
+);
