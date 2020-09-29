@@ -114,18 +114,18 @@ const buildRootList = async (pathToDir) => {
 };
 
 const buildEntireList = async function getFiles(dir, includeList) {
-  // const dirents = await readdir(dir, { withFileTypes: true });
-  // const files = await Promise.all(
-  //   dirents.map((dirent) => {
-  //     if (includeList.includes(dirent.name.toString())) {
-  //       console.log(dirent.name);
-  //       const res = resolve(dir, dirent.name);
-  //       return dirent.isDirectory() ? getFiles(res) : res;
-  //     }
-  //   })
-  // );
-  // console.log(dir);
-  // return Array.prototype.concat(...files);
+  const dirents = await readdir(dir, { withFileTypes: true });
+  const files = await Promise.all(
+    dirents.map((dirent) => {
+      if (includeList.includes(dirent.name.toString())) {
+        console.log(dirent.name);
+        const res = resolve(dir, dirent.name);
+        return dirent.isDirectory() ? getFiles(res) : res;
+      }
+    })
+  );
+  console.log(dir);
+  return Array.prototype.concat(...files);
 };
 const included = [' dirname-demo.js', ' README.md', ' server', ' test'];
 // buildEntireList(
