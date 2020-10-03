@@ -12,46 +12,12 @@
   </head>
   <body>
     <div class="container">
-      <h1>CodeMapper - Project Tree</h1>
-      <div id="visual-container">
-        <div id="data-vis"></div>
-        <!-- Instructions on how to interact with the FT visualization -->
-        <div id="side">
-          <h2>Instructions</h2>
-          <p>Instructions for how to use the visualization will go here...</p>
-          <div id="details"></div>
-        </div>
-        <!-- /side -->
+      <h1>CodeMapper</h1>
+      <h3>Which results would you like to go to?</h3>
+      <div>
+        <a href="file-structure.html"><button>Project Structure and JS file details</button></a>
+        <a href="dependencies.html"><button>Project Dependencies</button></a>
       </div>
-      <!-- /visual-container -->
-      <div class="close">+</div>
     </div>
-    <!-- /container -->
-    <script src="./foamtree.js"></script>
-    <!-- <script src="./lodash.min.js"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.5/ejs.js"></script>
-    <script type="module" src="./app.js"></script>
-
-    <script>
-      const closeBtn = document.querySelector('#details');
-      closeBtn.addEventListener('click', () => {
-        if (closeBtn.classList.contains('opened')) {
-          closeBtn.classList.remove('opened');
-        } else {
-          closeBtn.classList.add('opened');
-        }
-      });
-      console.log(closeBtn);
-      // let isMenuOpen = false;
-      // $menuBtn.addEventListener('click', () => {
-      //   if (!isMenuOpen) {
-      //     $menuBtn.classList.add('open');
-      //   } else {
-      //     $menuBtn.classList.remove('open');
-      //   }
-
-      //   isMenuOpen = !isMenuOpen;
-      // });
-    </script>
   </body>
 </html>

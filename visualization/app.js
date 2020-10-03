@@ -1,31 +1,6 @@
 /* eslint-disable import/extensions */
 /* eslint-disable no-undef */
 import foamTreeDataObj from '../data/foamTreeDataObj.js';
-// const element = document.getElementById('details');
-// console.log(element);
-
-// <img class="avatar" src="<%- owner.avatar_url %>"/>
-// <div class="info">
-//   <h2><a target="_blank" href="<%- owner.html_url %>"><%- owner.login %></a>/&#8203;<a target="_blank" href="<%- html_url %>"><%- name %></a></h2>
-//   <div class="stats">
-//     <img src="assets/svg/star.svg"/> <span><%- stargazers_count %></span>
-//     <img class="watchers" src="assets/svg/eye.svg"/> <span><%- watchers_count %></span>
-//     <img class="forks" src="assets/svg/fork.svg"/> <span><%- forks_count %></span>
-//   </div>
-
-//   <div class="description"><%- description %></div>
-//   <a target="_blank" href="<%- homepage %>"><%- homepage %></a>
-
-//   <hr/>
-
-//   <div style="color: #888">
-//     created: <span><%- moment(created_at).fromNow() %></span><br/>
-//     last push: <span><%- moment(pushed_at).fromNow() %></span><br/>
-//     last update: <span><%- moment(updated_at).fromNow() %></span>
-//   </div>
-// </div>
-// <div class="close">&times;</div>
-// `;
 
 window.addEventListener('load', () => {
   // Perform FoamTree embedding here
@@ -54,13 +29,13 @@ window.addEventListener('load', () => {
 
     window.addEventListener(
       'resize',
-      (function () {
+      (() => {
         let timeout;
-        return function () {
+        return () => {
           window.clearTimeout(timeout);
           timeout = window.setTimeout(foamtree.resize, 300);
         };
-      })()
+      })(),
     );
 
     // set some additional properties for the foamTree object
@@ -74,11 +49,8 @@ window.addEventListener('load', () => {
       rainbowColorDistribution: 'linear',
       groupBorderRadius: 0,
       onGroupClick(event) {
-        // console.log(event);
         event.preventDefault();
         const data = event.group;
-
-        // const element = document.getElementById('oudetailstput')
 
         console.log(data);
         const html = ejs.render(
@@ -150,20 +122,12 @@ window.addEventListener('load', () => {
           
           `,
 
-          { data: data }
+          { data }
         );
         document.getElementById('details').innerHTML = html;
         document.getElementById('details').classList.add('opened');
-        // console.log(JSON.stringify(details, null, 2));
-
-        // if (event.group.unselectable) {
-        //   event.preventDefault();
-        // }
 
         const closeBtn = document.getElementById('container');
-        // .addEventListener('click', function (evt) {
-        //   console.log(evt);
-        // });
         console.log(closeBtn);
       },
     });
