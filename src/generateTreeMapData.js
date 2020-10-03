@@ -1,29 +1,20 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable guard-for-in */
 const fs = require('fs');
 const PATH = require('path');
-var Highcharts = require('highcharts');
-
-// Load module after Highcharts is loaded
-// require('highcharts/modules/exporting')(Highcharts);
-// require('highcharts/modules/data')(Highcharts);
-// require('highcharts/modules/heatmap')(Highcharts);
-// require('highcharts/modules/treemap')(Highcharts);
-
-// let data = require('../data/fileTree.json');
-// <!-- <script src="https://code.highcharts.com/highcharts.js"></script>
-// <script src="https://code.highcharts.com/modules/data.js"></script>
-// <script src="https://code.highcharts.com/modules/heatmap.js"></script>
-// <script src="https://code.highcharts.com/modules/treemap.js"></script> -->
 
 const points = [];
 
-const generateTeeMapData = (data, parentId) => {
+const colors = ['#d1f510', '#856677', '#ae9ef0', '#0f687a', '#ceaf73', '#18425d', '#8f2392', '#d17715', '#a10475', '307fc9', '#53A4EF', '#21212D', '#90ED7D', '#D37D37', '#4F57EA', '#DD5676', '#F2D82E', '#117271', '#CE3D3D', '#65C6BE'];
+
+const generateTreeMapData = (data, parentId) => {
   for (const item in data) {
-    let id = `id_${item.toString()}`;
+    const id = `id_${item.toString()}`;
 
     const newPoint = {
       name: data[item].name,
-      // color: Highcharts.defaultOptions.colors[item],
-      colorValue: Math.round(Math.random() * 100),
+      color: colors[Math.round(Math.random() * 20)],
+      // colorValue: Math.round(Math.random() * 100),
       // colorValue: Math.round(data[item].size / 100),
     };
     if (parentId) {
@@ -35,7 +26,7 @@ const generateTeeMapData = (data, parentId) => {
 
     points.push(newPoint);
     if (data[item].isDirectory) {
-      generateTeeMapData(data[item].content, newPoint.id);
+      generateTreeMapData(data[item].content, newPoint.id);
     } else {
       newPoint.value = Math.round(data[item].size / 100);
     }
@@ -43,9 +34,9 @@ const generateTeeMapData = (data, parentId) => {
   return points;
 };
 
-//add data series to treeMapData object
+// add data series to treeMapData object
 async function writeTreeMapData(data) {
-  const dataSeries = await generateTeeMapData(data);
+  const dataSeries = await generateTreeMapData(data);
 
   // write to the result foam tree object
   const pathToFolder = PATH.resolve(__dirname, '../data');
@@ -60,7 +51,7 @@ async function writeTreeMapData(data) {
     'utf8',
     (err) => {
       if (err) throw err;
-    }
+    },
   );
 }
 

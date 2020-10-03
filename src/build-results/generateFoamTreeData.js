@@ -88,7 +88,7 @@ function generateFoamTreeArray(fileTreeArr) {
   const foamTreeArr = [];
 
   fileTreeArr.forEach((obj) => {
-    let outputObj = processObj(obj);
+    const outputObj = processObj(obj);
 
     // does the newly created object have a groups property?
     // if yes recursively iterate over the groups array until there are no more nested objects with content
@@ -115,7 +115,7 @@ async function writeFoamTreeData(tree) {
   }
 
   fs.writeFile(
-    PATH.resolve(__dirname, '../data/foamTreeDataObj.js'),
+    PATH.resolve(__dirname, '../../data/foamTreeDataObj.js'),
     `export default ${JSON.stringify(foamTreeData, null, 2)}`,
     'utf8',
     (err) => {
