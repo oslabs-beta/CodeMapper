@@ -6,6 +6,7 @@ const { generateTree } = require('./generateFileTree');
 const { filterAndParse } = require('./filterAndParse');
 const { writeFoamTreeData } = require('./build-results/generateFoamTreeData');
 const { generateDependencyData } = require('./build-results/generateDependencyData');
+const { writeTreeMapData } = require('./generateTreeMapData')
 
 async function flow(root, include, exclude) {
   // call generateTree with the root path passed in
@@ -22,13 +23,16 @@ async function flow(root, include, exclude) {
   try {
     if (fileTree !== undefined) {
       filterAndParse(fileTree);
+      writeTreeMapData(fileTree);
+      // create foamTree data for browser project tree data visualization
+      writeFoamTreeData(fileTree);
 
       // now that the fileTree has been fully updated in filterAndParse, lets make that obvious
       // by saving it in a new variable
       finalTree = fileTree;
 
       fs.writeFileSync(
-        PATH.resolve(__dirname, '../data/fileTree.json'),
+        PATH.resolve(__dirname, '../data/finalTree.json'),
         JSON.stringify(fileTree, null, 2)
       );
       // create foamTree data for browser project tree data visualization
@@ -40,8 +44,8 @@ async function flow(root, include, exclude) {
       // );
     }
   } catch (err) {
-    console.log(
-      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err}\x1b[37m`
+    console.error(
+      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`
     );
   }
 
