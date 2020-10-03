@@ -122,7 +122,7 @@ const run = async () => {
     .filter((el) => answers.included.indexOf(el) == -1);
   console.log(answers);
 
-  //something else to be done
+  //something else
 };
 
 run();
