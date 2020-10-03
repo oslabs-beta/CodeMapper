@@ -1,0 +1,58 @@
+{
+  "name": "filewalker.js",
+  "relativePath": "/Codemapper",
+  "fullPath": "/Users/username/CodeMapper/filewalker.js",
+  "extension": ".js",
+  "depth": 0,
+  "isDirectory": false,
+  "size": 14060,
+  "contents": {
+    "exports": {
+      "name": {
+        "type": {
+          "async": true,
+          "arrowFunction": false,
+          "anonymous": true
+        }
+      }
+    },
+    "imports": {
+      "name": {
+        "originalName": "point this to the originalFile.contents.exports.name",
+        "type": "point this to the originalFile.contents.exports.type"
+      }
+    },
+    "functiondeclarations": {
+      "1": {
+        "name": "stat || unknown",
+        "type": {
+          "async": false,
+          "arrowFunction": false,
+          "anonymous": true
+        },
+        "arguments": [
+          "file"
+        ],
+        "innerFunctionCalls": {
+          "1": {
+            "name": "fs.stat",
+            "arguments": [
+              "file",
+              "(err, stats) => {\n  if (err) {\n    reject(err);\n  } else {\n    resolve(stats);\n  }\n}"
+            ],
+            "functionText": "async function stat(file) {\n  return new Promise((resolve, reject) => {\n    fs.stat(file, (err, stats) => {\n      if (err) {\n        reject(err);\n      } else {\n        resolve(stats);\n      }\n    });\n  });\n}"
+          }
+        }
+      }
+    },
+    "functioncalls": {
+      "1": {
+      "name": "stat",
+      "arguments": [
+        "filename"
+      ],
+      "functionText": ""
+      }
+    }
+  }
+}
