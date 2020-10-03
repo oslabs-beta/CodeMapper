@@ -121,11 +121,6 @@ const run = async () => {
     .map((el) => el.name)
     .filter((el) => answers.included.indexOf(el) == -1);
   console.log(answers);
-  // // create the file
-  // const filePath = createFile(FILENAME, EXTENSION);
-
-  // // show success message
-  // success(filePath);
 };
 
 run();
