@@ -6,7 +6,7 @@ const { generateTree } = require('./generateFileTree');
 const { filterAndParse } = require('./filterAndParse');
 const { writeFoamTreeData } = require('./build-results/generateFoamTreeData');
 const { generateDependencyData } = require('./build-results/generateDependencyData');
-const { writeTreeMapData } = require('./generateTreeMapData')
+const { writeTreeMapData } = require('./generateTreeMapData');
 
 async function flow(root, include, exclude) {
   // call generateTree with the root path passed in
