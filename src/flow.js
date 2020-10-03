@@ -4,6 +4,7 @@ const PATH = require('path');
 const { generateTree } = require('./generateFileTree');
 const { filterAndParse } = require('./filterAndParse');
 const { writeFoamTreeData } = require('./generateFoamTreeData');
+const { writeTreeMapData } = require('./generateTreeMapData');
 // const createDependencyResult = require('./createDependencyResult');
 // const createFunctionalityResult = require('./createFunctionalityResult');
 // const buildResults = require('./buildResults');
@@ -22,22 +23,22 @@ async function flow(root, include, exclude) {
   try {
     if (fileTree !== undefined) {
       filterAndParse(fileTree);
-
-      fs.writeFileSync(
-        PATH.resolve(__dirname, '../data/fileTree.json'),
-        JSON.stringify(fileTree, null, 2)
-      );
+      writeTreeMapData(fileTree);
       // create foamTree data for browser project tree data visualization
       writeFoamTreeData(fileTree);
 
-      // console.log(
-      //   '\x1b[32m',
-      //   'All done! look in data/finalTree.json to see the current result.\x1b[37m'
-      // );
+      fs.writeFileSync(
+        PATH.resolve(__dirname, '../data/finalTree.json'),
+        JSON.stringify(fileTree, null, 2)
+      );
+      console.log(
+        '\x1b[32m',
+        'All done! look in data/finalTree.json to see the current result.\x1b[37m'
+      );
     }
   } catch (err) {
-    console.log(
-      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err}\x1b[37m`
+    console.error(
+      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`
     );
   }
 

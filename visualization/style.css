@@ -16,7 +16,8 @@ body {
 body {
   display: grid;
   place-items: center;
-  background-color: #474848;
+  background-color: #1e272e;
+/*   background-color: #474848; */
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 16px;
 }

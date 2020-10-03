@@ -8,13 +8,17 @@
       rel="stylesheet"
     />
     <title>CodeMapper - Project Tree</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/modules/treemap.js"></script>
     <link type="text/css" rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="container">
       <h1>CodeMapper - Project Tree</h1>
       <div id="visual-container">
-        <div id="data-vis"></div>
+        <div id="container"></div>
         <!-- Instructions on how to interact with the FT visualization -->
         <div id="side">
           <h2>Instructions</h2>
@@ -28,10 +32,8 @@
     </div>
     <!-- /container -->
     <script src="./foamtree.js"></script>
-    <!-- <script src="./lodash.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.5/ejs.js"></script>
     <script type="module" src="./app.js"></script>
-
     <script>
       const closeBtn = document.querySelector('#details');
       closeBtn.addEventListener('click', () => {
