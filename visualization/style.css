@@ -31,8 +31,7 @@ body {
   padding: 1rem 2.5rem 2.5rem;
 }
 
-h1,
-h2 {
+h1 {
   color: #ffdd59;
   font-weight: 400;
   font-size: 3rem;
@@ -48,8 +47,45 @@ h2 {
   text-decoration: underline;
 }
 
+h3 {
+  color: #e0e0e0;
+  font-size: 1.5rem;
+}
+
 p {
   line-height: 1.3rem;
+}
+
+button {
+  padding: 5px 10px;
+  background-color: #e0e0e0;
+  font-size: 1rem;
+  font-weight:bold;
+  border-radius: 5px;
+  border: none;
+  margin: 10px;
+}
+
+#chart-and-instruction-block {
+  display: flex;
+  height: 600px;
+  /* align-content: space-around; */
+}
+
+#container {
+  width: 50%;
+  margin: 10px 5px 10px 10px;
+}
+
+#dependency-instructions {
+  width: 50%;
+  margin: 10px 10px 10px 5px;
+  padding: 15px;
+  background-color: #e0e0e0;
+}
+
+.highcharts-data-table {
+  background-color: #e0e0e0;
 }
 
 #visual-container {
