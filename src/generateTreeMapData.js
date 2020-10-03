@@ -5,14 +5,16 @@ const PATH = require('path');
 
 const points = [];
 
+const colors = ['#d1f510', '#856677', '#ae9ef0', '#0f687a', '#ceaf73', '#18425d', '#8f2392', '#d17715', '#a10475', '307fc9', '#53A4EF', '#21212D', '#90ED7D', '#D37D37', '#4F57EA', '#DD5676', '#F2D82E', '#117271', '#CE3D3D', '#65C6BE'];
+
 const generateTreeMapData = (data, parentId) => {
   for (const item in data) {
     const id = `id_${item.toString()}`;
 
     const newPoint = {
       name: data[item].name,
-      // color: Highcharts.defaultOptions.colors[item],
-      colorValue: Math.round(Math.random() * 100),
+      color: colors[Math.round(Math.random() * 20)],
+      // colorValue: Math.round(Math.random() * 100),
       // colorValue: Math.round(data[item].size / 100),
     };
     if (parentId) {
