@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@400;600&family=Source+Code+Pro:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
     <title>CodeMapper - Project Tree</title>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/data.js"></script>
@@ -24,9 +28,32 @@
         <!-- /side -->
       </div>
       <!-- /visual-container -->
+      <div class="close">+</div>
     </div>
     <!-- /container -->
-    <!-- <script src="./foamtree.js"></script> -->
+    <script src="./foamtree.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.5/ejs.js"></script>
     <script type="module" src="./app.js"></script>
+    <script>
+      const closeBtn = document.querySelector('#details');
+      closeBtn.addEventListener('click', () => {
+        if (closeBtn.classList.contains('opened')) {
+          closeBtn.classList.remove('opened');
+        } else {
+          closeBtn.classList.add('opened');
+        }
+      });
+      console.log(closeBtn);
+      // let isMenuOpen = false;
+      // $menuBtn.addEventListener('click', () => {
+      //   if (!isMenuOpen) {
+      //     $menuBtn.classList.add('open');
+      //   } else {
+      //     $menuBtn.classList.remove('open');
+      //   }
+
+      //   isMenuOpen = !isMenuOpen;
+      // });
+    </script>
   </body>
 </html>
