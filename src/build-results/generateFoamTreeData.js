@@ -108,11 +108,11 @@ async function writeFoamTreeData(tree) {
   foamTreeData.groups = await generateFoamTreeArray(tree);
 
   // write to the result foam tree object
-  const data = PATH.resolve(__dirname, '../data');
+  // const data = PATH.resolve(__dirname, '../../data');
 
-  if (!fs.existsSync(data)) {
-    fs.mkdirSync(data);
-  }
+  // if (!fs.existsSync(data)) {
+  //   fs.mkdirSync(data);
+  // }
 
   fs.writeFile(
     PATH.resolve(__dirname, '../../data/foamTreeDataObj.js'),

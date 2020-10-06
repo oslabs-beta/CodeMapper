@@ -1,8 +1,7 @@
-const fs = require('fs');
-const PATH = require('path');
 const { list } = require('./filewalker');
 
 // This is our internal function to run the filewalker with all the options passed in.
+// When we replace the filewalker with Nadya's new version, we can get rid of this file completely
 // The filewalker functionality is adapted from recursive-readdir-async repo/npm library
 // More details on the options passed in here can be found in that documentation until we add our own
 async function generateTree(rootPath, include = [], exclude = []) {
@@ -43,14 +42,7 @@ async function generateTree(rootPath, include = [], exclude = []) {
   // We start by getting a list of the files using the options and the root path
   const fileTree = await list(rootPath, options);
 
-  // if we end up with an error, log it to the console
-  // ** this is terrible error handling!! Change this later ***
-  if (fileTree.error) {
-    console.error(fileTree.error);
-  } else {
-    // and return the filetree
-    return fileTree;
-  }
+  return fileTree;
 }
 
 module.exports = { generateTree };

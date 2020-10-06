@@ -39,14 +39,9 @@ async function writeTreeMapData(data) {
   const dataSeries = await generateTreeMapData(data);
 
   // write to the result foam tree object
-  const pathToFolder = PATH.resolve(__dirname, '../data');
-
-  if (!fs.existsSync(pathToFolder)) {
-    fs.mkdirSync(pathToFolder);
-  }
 
   fs.writeFile(
-    PATH.resolve(__dirname, '../data/treeMapData.js'),
+    PATH.resolve(__dirname, '../../data/treeMapData.js'),
     `export default ${JSON.stringify(dataSeries, null, 2)}`,
     'utf8',
     (err) => {
