@@ -28,7 +28,7 @@
     "@babel/preset-react": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
     "@babel/traverse": "^7.11.0",
-    "browserify": "^16.5.2",
+    "figlet": "^1.5.0",
     "fs": "0.0.1-security",
     "inquirer": "^7.3.3",
     "path": "^0.12.7"
