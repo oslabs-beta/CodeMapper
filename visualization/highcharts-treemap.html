@@ -18,26 +18,27 @@
     <div class="container">
       <h1>CodeMapper - Project Tree</h1>
       <div id="visual-container">
-        <div id="container"></div>
+        <div id="treemap-container"></div>
         <!-- Instructions on how to interact with the FT visualization -->
         <div id="side">
           <h2>Instructions</h2>
           <p>To the left is a graphic showing the file and folder structure of your project.</p><br>
-          <p>If a file can be found at the root level, it will be displayed as a box without a header. If it is inside a folder, it will have a header section
-            above the blocks for all the files and nested folders that can be found inside it.</p><br>
-          <p>Some files or folders have names that don't fit into this graphic dependending on the size of the screen it's rendering on. These names will be represented by ellipses(...). 
-          To find out what their titles are, you can hover over them with a mouse or use a mouse to scroll while your cursor is on the graphic.
-          This will zoom into the area around where your cursor is. This can also make titles easier to see.</p><br>
-          <p>You can also click and drag the graphic around to look at different areas of it.</p><br>
-          <p>To learn more about a Javascript file, click the box with its name. In the right sidebar, these instructions will be replaced with the information about that particular file.</p><br>
-          <p>To navigate inside a folder, click the box with its name and the graphic will change to show only the relevant files and nested folders within that folder.</p>
+          <p>You will start out with the root level of your project being displayed.
+            Any folders found will be shown as a collection of boxes that with the folder name centered over boxes.
+            Any files will be displayed with their title centered over a single box, and will include the appropriate file extension in their title.</p><br>
+          <p>The size of each box represents the size of its respective file or folder relative to all other files at the same level.
+            This can offer a high-level view of what files are largest in the project.</p><br>
+          <p>You can back out of any folder you've clicked into by clicking the "&lt; Back" button in the top right of the area displaying the visualization.</p><br>
+          <p>To navigate inside a folder, click the box with its name and the graphic will change to show only the relevant files and nested folders within that folder.</p><br>
+          <p>To learn more about a Javascript file, click the box with its name on it.
+            In the right sidebar you're reading these instructions in, this text will be replaced with the information about that particular file.
+            That text will be removed again if you click a new file to analyze.</p>
           <div id="details"></div>
         </div>
         <!-- /side -->
       </div>
     </div>
     <!-- /container -->
-    <script src="./foamtree.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.5/ejs.js"></script>
     <script type="module" src="../src/build-results/highcharts-treemap.js"></script>
     <script>
