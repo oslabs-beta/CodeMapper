@@ -22,6 +22,7 @@ async function flow(root, include, exclude) {
   let finalTree;
   try {
     if (fileTree !== undefined) {
+      console.log(fileTree);
       filterAndParse(fileTree);
       writeTreeMapData(fileTree);
       // create foamTree data for browser project tree data visualization
@@ -63,5 +64,6 @@ async function flow(root, include, exclude) {
   // this solves issues with require as well
   exec('browserify src/build-results/createDependencyResult.js -o bundle.js');
 }
+// flow();
 
 module.exports = flow;
