@@ -44,5 +44,6 @@ async function flow(root, include, exclude) {
   // for the dependency wheel
   generateDependencyData(fileTree);
 }
+// flow();
 
 module.exports = flow;
