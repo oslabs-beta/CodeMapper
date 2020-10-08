@@ -1,14 +1,14 @@
 const fs = require('fs');
 const PATH = require('path');
-const { generateTree } = require('./generateFileTree');
+const chalk = require('chalk');
 const { filterAndParse } = require('./filterAndParse');
 const { writeFoamTreeData } = require('./build-results/generateFoamTreeData');
 const { generateDependencyData } = require('./build-results/generateDependencyData');
 const { writeTreeMapData } = require('./build-results/generateTreeMapData');
 
-async function flow(root, include, exclude) {
+async function flow(fileTree) {
   // call generateTree with the root path passed in
-  const fileTree = await generateTree(root, include, exclude);
+  // const fileTree = await generateTree(root, include, exclude);
 
   // make the data folder if it doesn't exist
   const data = PATH.resolve(__dirname, '../data');
@@ -43,6 +43,12 @@ async function flow(root, include, exclude) {
   // we're going to pass that into generateDependencyData so that we can convert it into the correct type
   // for the dependency wheel
   generateDependencyData(fileTree);
+
+  console.log(
+    chalk.greenBright('And we\'re done! To view the results, open the index.html file we\'ve generated in the *** folder in any up-to-date browser.'),
+    // chalk.magenta('Ok! We\'re currently analyzing your codebase using the following settings:'),
+  );
+
 }
 
 module.exports = flow;

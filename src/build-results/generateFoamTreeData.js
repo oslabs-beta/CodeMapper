@@ -121,9 +121,9 @@ async function writeFoamTreeData(tree) {
     (err) => {
       if (err) throw err;
 
-      console.log(
-        '\x1b[32m\n\t*** Data for visualization created ***\n The Project Structure can now be viewed in the browser\x1b[37m\n'
-      );
+      // console.log(
+      //   '\x1b[32m\n\t*** Data for visualization created ***\n The Project Structure can now be viewed in the browser\x1b[37m\n'
+      // );
     }
   );
 }
