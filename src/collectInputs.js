@@ -30,7 +30,8 @@ const questions = [
   {
     name: 'projectDirectory',
     type: 'input',
-    message: 'Add the full path of the codebase folder you\'d like to analyze, or press enter to use the current directory:',
+    message:
+      "Add the full path of the codebase folder you'd like to analyze, or press enter to use the current directory:",
     default: cwd,
     // default: 'C:\\Users\\Lenovo\\Documents\\PTRI program\\unit-8SB-node-pages',
     // validate: validatePath,
@@ -62,20 +63,20 @@ const init = () => {
         // font: 'Ghost',
         horizontalLayout: 'default',
         verticalLayout: 'default',
-      }),
-    ),
+      })
+    )
   );
   console.log(
     chalk.magenta(
-      '                           your favourite codebase analyser! \n\n',
-    ),
+      '                           your favourite codebase analyser! \n\n'
+    )
   );
   console.log(
     `How does it work?
     1. Select the root folder for the codebase you'd like to analyze.
     2. Add/remove files or folders from the top level of the project based on what you want analyzed.
     3. Blink and enjoy the result!
-    `,
+    `
   );
 };
 
@@ -98,7 +99,7 @@ const buildRootList = async (pathToDir) => {
     type: 'checkbox',
     pageSize: list.length || 20,
     message:
-      'Select files/folders to include, then press <enter> when you\'re done.',
+      "Select files/folders to include, then press <enter> when you're done.",
     name: 'includes',
     choices: list,
     // showHelpTip: true,
@@ -137,7 +138,7 @@ const buildEntireList = async (dir, excluded, depth = 0) => {
           item.name = path.basename(res);
         }
         return item;
-      }),
+      })
   );
   return files;
 };
@@ -171,14 +172,14 @@ const collectData = async () => {
     .map((el) => el.name)
     .filter((el) => answers.included.indexOf(el) == -1);
   console.log(
-    chalk.magenta('Ok! We\'re currently analyzing your codebase.'),
+    chalk.magenta("Ok! We're currently analyzing your codebase.")
     // chalk.magenta('Ok! We\'re currently analyzing your codebase using the following settings:'),
   );
 
   const entireList = await buildEntireList(projectDirectory, answers.excluded);
 
-  flow(entireList);
-  // console.log(` ${JSON.stringify(entireList, null, 2)}`);
+  flow(entireList, projectDirectory);
+  // console.log(`project directory ${JSON.stringify(entireList, null, 2)}`);
 };
 
 collectData();
