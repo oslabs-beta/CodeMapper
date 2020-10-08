@@ -7,8 +7,6 @@ const inquirer = require('inquirer');
 const figlet = require('figlet');
 const chalk = require('chalk');
 const flow = require('./flow');
-// const normalizePath = require('./normalizePath');
-// const getFiles = require('./readFiles');
 
 const cwd = process.cwd();
 
