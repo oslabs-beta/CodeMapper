@@ -7,32 +7,32 @@ const PATH = require('path');
 const { transform } = require('./transform');
 
 // this function is only for dev and can be removed for production
-const createAST = (filePath) => {
-  // this gets used by transformSync to generate our AST (only used in dev)
-  let source;
-  try {
-    source = fs.readFileSync(filePath, 'utf8');
-  } catch (err) {
-    console.log(`Found an error while reading a file to generate a dev AST for it: ${err}`);
-  }
+// const createAST = (filePath) => {
+//   // this gets used by transformSync to generate our AST (only used in dev)
+//   let source;
+//   try {
+//     source = fs.readFileSync(filePath, 'utf8');
+//   } catch (err) {
+//     console.log(`Found an error while reading a file to generate a dev AST for it: ${err}`);
+//   }
 
-  try {
-    // create the AST just for us to see and work with temporarily (won't be used for end user)
-    const { ast } = babel.transformSync(source, {
-      filename: filePath,
-      ast: true,
-      code: true,
-    });
+//   try {
+//     // create the AST just for us to see and work with temporarily (won't be used for end user)
+//     const { ast } = babel.transformSync(source, {
+//       filename: filePath,
+//       ast: true,
+//       code: true,
+//     });
 
-    // write the ast to a file (temporary)
-    fs.writeFileSync(
-      PATH.resolve(__dirname, '../data/data.json'),
-      JSON.stringify(ast, null, 2),
-    );
-  } catch (err) {
-    console.log(`error while creating ast for dev purposes. error is ${err}`);
-  }
-};
+//     // write the ast to a file (temporary)
+//     fs.writeFileSync(
+//       PATH.resolve(__dirname, '../data/data.json'),
+//       JSON.stringify(ast, null, 2),
+//     );
+//   } catch (err) {
+//     console.log(`error while creating ast for dev purposes. error is ${err}`);
+//   }
+// };
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
 const fileParser = (fileObject, filePath) => {
@@ -566,7 +566,7 @@ const fileParser = (fileObject, filePath) => {
 // later we can just export the fileParser and delete all the AST stuff
 const parser = (fileObject) => {
   const filePath = fileObject.fullname;
-  createAST(filePath);
+  // createAST(filePath);
   fileParser(fileObject, filePath);
 };
 

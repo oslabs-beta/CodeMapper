@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 // create a function that can accept the tree and iterate over it
 // to generate import and export data as an array of arrays
 // where each inner array has the exporting file first, the importing file second
@@ -21,7 +24,14 @@ const generateDependencyData = (finalTree, importExportData = []) => {
     }
   }
 
-  return importExportData;
+  fs.writeFileSync(
+    path.resolve(__dirname, '../../data/dependencies.js'),
+    `export default ${JSON.stringify(importExportData, null, 2)}`,
+    'utf8',
+    (err) => {
+      if (err) throw err;
+    },
+  );
 };
 
 module.exports = { generateDependencyData };

@@ -17,13 +17,13 @@
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script src="https://code.highcharts.com/modules/debugger.js"></script>
-    <script src="../bundle.js"></script>
+    <script type="module" src="../src/build-results/highcharts-dependencies.js"></script>
   </head>
   <body>
     <h1>CodeMapper - Project Dependencies</h1>
     <figure class="highcharts-figure">
       <div id="chart-and-instruction-block">
-        <div id="container"></div>
+        <div id="dependency-wheel-container"></div>
         <div id="dependency-instructions">
           <p class="highcharts-description">
             To the left is a chart showing the dependencies between javascript files in this project.
@@ -36,6 +36,5 @@
         </div>
       </div>
     </figure>
-    <!-- <a href="/dependency-wheel.html" class="button">See Dependencies</a> -->
   </body>
 </html>

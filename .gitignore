@@ -1,8 +1,5 @@
 # Local files for testing
-testfiles
 data
-example-code
-bundle.js
 
 # VSCode settings
 .vscode
