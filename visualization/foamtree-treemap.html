@@ -13,10 +13,10 @@
   <body>
     <div class="container">
       <h1>CodeMapper - Project Tree</h1>
-      <div id="visual-container">
+      <div class="visual-container">
         <div id="data-vis"></div>
         <!-- Instructions on how to interact with the FT visualization -->
-        <div id="side">
+        <div class="side">
           <h2>Instructions</h2>
           <p>To the left is a graphic showing the file and folder structure of your project.</p><br>
           <p>If a file can be found at the root level, it will be displayed as a box without a header. If it is inside a folder, it will have a header section
@@ -38,7 +38,7 @@
     <script src="./foamtree.js"></script>
     <!-- <script src="./lodash.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.5/ejs.js"></script>
-    <script type="module" src="../src/build-results/foamtree-treemap.js"></script>
+    <script type="module" src="./foamtree-treemap.js"></script>
 
     <script>
       const closeBtn = document.querySelector('#details');

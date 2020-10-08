@@ -1,7 +1,7 @@
 /* eslint-disable import/extensions */
 /* eslint-disable no-undef */
 
-import treeMapData from '../../data/treeMapData.js';
+import treeMapData from '../data/treeMapData.js';
 
 Highcharts.chart('treemap-container', {
   // colorAxis: {
@@ -10,7 +10,7 @@ Highcharts.chart('treemap-container', {
   // },
   series: [
     {
-      name: 'testName',
+      name: 'size',
       type: 'treemap',
       layoutAlgorithm: 'squarified',
 

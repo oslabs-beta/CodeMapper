@@ -66,26 +66,12 @@ button {
   margin: 10px;
 }
 
-#chart-and-instruction-block {
-  display: flex;
-  height: 600px;
-  /* align-content: space-around; */
-}
-
 #treemap-container {
   width: 80%;
 }
 
 #dependency-wheel-container {
-  width: 50%;
-  margin: 10px 5px 10px 10px;
-}
-
-#dependency-instructions {
-  width: 50%;
-  margin: 10px 10px 10px 5px;
-  padding: 15px;
-  background-color: #e0e0e0;
+  width: 80%;
 }
 
 .highcharts-data-table {
@@ -97,10 +83,10 @@ button {
   text-shadow: none;
 }
 
-#visual-container {
+.visual-container {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-evenly;
   width: 100%;
   height: 100%;
   align-items: stretch;
@@ -112,7 +98,7 @@ button {
   flex: 1 1 auto;
 }
 
-#side {
+.side {
   background-color: #fff;
   padding: 1rem;
   position: relative;

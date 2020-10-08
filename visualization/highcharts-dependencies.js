@@ -1,4 +1,4 @@
-import data from '../../data/dependencies.js';
+import data from '../data/dependencies.js';
 
 Highcharts.chart('dependency-wheel-container', {
   title: {
