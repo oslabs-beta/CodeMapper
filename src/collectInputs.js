@@ -74,7 +74,7 @@ const init = () => {
   console.log(
     `How does it work?
     1. Select the root folder for the codebase you'd like to analyze.
-    2. Add/remove files or folders from the top level of the project based on what you want analyzed.
+    2. Select the files or folders at the top level of the project that you'd like to include in the analysis.
     3. Blink and enjoy the result!
     `
   );

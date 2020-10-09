@@ -63,12 +63,12 @@ async function flow(fileTree, pathToDir) {
 
   (async () => {
     await open(`${pathToDir}/CodeMapper/Visualization/index.html`, {
-      wait: true,
+      wait: false,
     });
   })();
   console.log(
     chalk.greenBright(
-      `And we're done! To view the results, open the index.html file we've generated in the ${pathToDir}/CodeMapper folder in any up-to-date browser.`
+      `And we're done! To view the results, open the index.html file we've generated in the ${pathToDir}/CodeMapper/Visualization folder in any up-to-date browser.`
     )
   );
 }
