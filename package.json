@@ -32,7 +32,10 @@
     "figlet": "^1.5.0",
     "fs": "0.0.1-security",
     "inquirer": "^7.3.3",
+    "open": "^7.3.0",
     "path": "^0.12.7"
   },
-  "devDependencies": {}
+  "bin": {
+    "codemapper": "./src/collectInputs.js"
+  }
 }

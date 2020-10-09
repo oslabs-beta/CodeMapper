@@ -13,7 +13,6 @@ Highcharts.chart('treemap-container', {
     {
       name: 'size',
       type: 'treemap',
-
       layoutAlgorithm: 'squarified',
 
       allowDrillToNode: true,
