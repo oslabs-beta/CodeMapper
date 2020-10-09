@@ -1,3 +1,9 @@
+# Local files for testing
+data
+
+# VSCode settings
+.vscode
+
 # Logs
 logs
 *.log

@@ -1,9 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: 'Baloo Tamma 2', cursive;
 }
 
 html,
@@ -16,7 +17,8 @@ body {
   display: grid;
   place-items: center;
   background-color: #1e272e;
-  font-family: "IBM Plex Sans", sans-serif;
+/*   background-color: #474848; */
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 16px;
 }
 
@@ -30,8 +32,7 @@ body {
   padding: 1rem 2.5rem 2.5rem;
 }
 
-h1,
-h2 {
+h1 {
   color: #ffdd59;
   font-weight: 400;
   font-size: 3rem;
@@ -47,32 +48,182 @@ h2 {
   text-decoration: underline;
 }
 
+h3 {
+  color: #e0e0e0;
+  font-size: 1.5rem;
+}
+
 p {
   line-height: 1.3rem;
 }
 
-#visual-container {
+button {
+  padding: 7px 23px;
+  background-color: #e0e0e0;
+  font-size: 1rem;
+  border-radius: 3px;
+  border: none;
+  margin: 10px;
+}
+
+#treemap-container {
+  width: 80%;
+}
+
+#dependency-wheel-container {
+  width: 80%;
+}
+
+.highcharts-data-table {
+  background-color: #e0e0e0;
+}
+
+.highcharts-container {
+  font-family: 'Helvetica', sans-serif;
+  text-shadow: none;
+}
+
+.visual-container {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: space-evenly;
   width: 100%;
   height: 100%;
+  align-items: stretch;
 }
 
 #data-vis {
   background-color: #1e272e;
+
+  flex: 1 1 auto;
+}
+
+.side {
+  background-color: #fff;
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 350px;
+}
+
+#details {
+  position: absolute;
+  top: 0;
+  right: -200%;
+  background: #303030;
+  color: white;
+  width: calc(100% + 2rem);
+  height: 100%;
+  overflow-y: scroll;
+  /* pointer-events: none; */
+  transition: all 1s ease;
+}
+#details.opened {
+  right: -2rem;
+  transition: all 1s ease;
+}
+
+/* #details:after {
+  position: absolute;
+  display: block;
+  content: '+';
+  width: 2rem;
+  height: 2rem;
+  right: 1.5rem;
+  cursor: pointer;
+  top: 0.5rem;
+  right: 2rem;
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  transform: rotate(45deg);
+  pointer-events: all;
+  transform-origin: 50% 50%;
+}
+#details:hover:after {
+  transform: rotate(145deg);
+  transition: transform 1s ease;
+  transform-origin: 50% 50%;
+} */
+#details h3 {
+  line-height: 1.9;
+  text-align: center;
+  margin: 0.5rem 0 0 0;
+  border-bottom: 2px #3a3c3c solid;
+  text-transform: uppercase;
+}
+
+#details h4 {
+  line-height: 240%;
+  text-align: center;
+  margin: 1rem 2rem 0 0;
+}
+/* #details h3:first-of-type {
+  background: #4e7fa9;
+} */
+/* .close {
+  position: absolute;
+  width: 2rem;
+  height: 2rem;
+  right: 0.9rem;
+  z-index: 2;
+  top: 0.5rem;
+}
+
+.close span {
+  display: block;
   width: 100%;
   height: 100%;
-}
+  font-weight: 600;
+  transform: rotate(45deg);
 
-#side {
-  background-color: #fff;
-  width: 20%;
-  height: 100%;
-  padding: 1rem;
+  font-size: 2rem;
+  line-height: 1;
+  color: #fff;
 }
-
+.close span:hover {
+  transform: rotate(135deg);
+ 
+} */
+ul {
+  padding: 0 1rem 1rem 1rem;
+  list-style: none;
+}
+li {
+  position: relative;
+  background: #3a3c3c;
+  margin: 0.3rem 1.5rem 0.3rem 0.5rem;
+  line-height: 1.2rem;
+  font-size: 0.8rem;
+  padding: 0 0.5rem;
+  max-height: 2.5rem;
+  overflow: hidden;
+}
+.blue {
+  color: #ffd635;
+  font-weight: 600;
+}
+.blue > span {
+  color: white;
+  font-weight: 400;
+}
+.pink {
+  color: #ff03ff;
+  font-weight: 600;
+}
+.pink > span {
+  color: white;
+  font-weight: 400;
+}
+.green {
+  color: #54ff59;
+  font-weight: 600;
+}
+.green > span {
+  color: white;
+  font-weight: 400;
+}
 canvas {
   cursor: pointer;
 }

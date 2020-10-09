@@ -3,26 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@400;600&family=Source+Code+Pro:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
     <title>CodeMapper - Project Tree</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/modules/treemap.js"></script>
     <link type="text/css" rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="container">
-      <h1>CodeMapper - Project Tree</h1>
-      <div id="visual-container">
-        <div id="data-vis"></div>
-        <!-- Instructions on how to interact with the FT visualization -->
-        <div id="side">
-          <h2>Instructions</h2>
-          <p>Instructions for how to use the visualization will go here...</p>
-          <div id="details"></div>
-        </div>
-        <!-- /side -->
+      <h1>CodeMapper</h1>
+      <h3>Which results would you like to go to?</h3>
+      <div>
+        <a href="foamtree-treemap.html"><button>FoamTree Project Structure and JS file details</button></a>
+        <a href="highcharts-treemap.html"><button>Highcharts Project Structure and JS file details</button></a>
+        <a href="dependencies.html"><button>Project Dependencies</button></a>
       </div>
-      <!-- /visual-container -->
     </div>
-    <!-- /container -->
-    <script src="./foamtree.js"></script>
-    <script type="module" src="./app.js"></script>
   </body>
 </html>

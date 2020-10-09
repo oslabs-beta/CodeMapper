@@ -1,48 +1,55 @@
-// temporary, for seeing the output
 const fs = require('fs');
 const PATH = require('path');
-const { generateTree } = require('./generateFileTree');
+const chalk = require('chalk');
 const { filterAndParse } = require('./filterAndParse');
-const { writeFoamTreeData } = require('./generateFoamTreeData');
-// const createDependencyResult = require('./createDependencyResult');
-// const createFunctionalityResult = require('./createFunctionalityResult');
-// const buildResults = require('./buildResults');
+const { writeFoamTreeData } = require('./build-results/generateFoamTreeData');
+const { generateDependencyData } = require('./build-results/generateDependencyData');
+const { writeTreeMapData } = require('./build-results/generateTreeMapData');
 
-async function flow(root, include, exclude) {
+async function flow(fileTree) {
   // call generateTree with the root path passed in
-  const fileTree = await generateTree(root, include, exclude);
+  // const fileTree = await generateTree(root, include, exclude);
 
-  // these two could be concurrent
-    // call createStructureResult with the file tree passed in
-    // to generate the file/folder structure result
-    // createStructureResult(fileTree);
+  // make the data folder if it doesn't exist
+  const data = PATH.resolve(__dirname, '../data');
+  if (!fs.existsSync(data)) {
+    fs.mkdirSync(data);
+  }
 
-    // call filter, passing in the file tree, to get an array of pointers to the JS file objects
-    // this will also pass all the js files to the parser
   try {
     if (fileTree !== undefined) {
+      // call filter, passing in the file tree, to get an array of pointers to the JS file objects
+      // this will also pass all the js files to the parser
       filterAndParse(fileTree);
-      // create foamTree data for browser project tree data visualization
-      writeFoamTreeData(fileTree);
-
-      fs.writeFileSync(PATH.resolve(__dirname, '../data/finalTree.json'), JSON.stringify(fileTree, null, 2));
-      console.log('\x1b[32m', 'All done! look in data/finalTree.json to see the current result.\x1b[37m');
     }
   } catch (err) {
-    console.error(`\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`);
+    console.error(
+      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`,
+    );
+  }
+
+  try {
+    // create treemap data for highcharts version of the treemap
+    writeTreeMapData(fileTree);
+    // create treemap data for foamtree version of the treemap
+    writeFoamTreeData(fileTree);
+  } catch (err) {
+    console.error(
+      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`,
+    );
   }
 
   // our original fileTree should now be modified to give us what we need for generating other results
-  // so we'll pass it to our other results-generating functions
-  // these can happen concurrently
-    // const dependencies = createDependencyResult(fileTree);
-    // const functionality = createFunctionalityResult(fileTree);
+  // we're going to pass that into generateDependencyData so that we can convert it into the correct type
+  // for the dependency wheel
+  generateDependencyData(fileTree);
 
-  // put all the results into an array
-  // const results = [structure, dependencies, functionality];
+  console.log(
+    chalk.greenBright('And we\'re done! To view the results, open the index.html file we\'ve generated in the *** folder in any up-to-date browser.'),
+    // chalk.magenta('Ok! We\'re currently analyzing your codebase using the following settings:'),
+  );
 
-  // and then call something like this to build the page:
-  // buildResults(results);
 }
+// flow();
 
 module.exports = flow;
