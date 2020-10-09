@@ -25,7 +25,7 @@ async function flow(fileTree, pathToDir) {
   }
 
   //generates html files for the visualization in the project directory
-  console.log(path.resolve(process.cwd(), `visualization`));
+  // console.log(path.resolve(process.cwd(), `visualization`));
   await generateHTMLfiles(
     path.resolve(process.cwd(), `visualization`),
     `${pathToDir}/CodeMapper/Visualization`
@@ -46,14 +46,18 @@ async function flow(fileTree, pathToDir) {
     // our original fileTree should now be modified to give us what we need for generating other results
     // we're going to pass that into generateDependencyData so that we can convert it into the correct type
     // for treeMap chart
-    writeTreeMapData(fileTree, pathToDir);
-    // for the dependency wheel
-    generateDependencyData(fileTree, [], pathToDir);
+    await Promise.all([
+      writeTreeMapData(fileTree, pathToDir),
+      generateDependencyData(fileTree, [], pathToDir),
+    ]);
+    // writeTreeMapData(fileTree, pathToDir);
+    // // for the dependency wheel
+    // generateDependencyData(fileTree, [], pathToDir);
     // create treemap data for foamtree version of the treemap
     // writeFoamTreeData(fileTree);
   } catch (err) {
     console.error(
-      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`
+      `\n\x1b[31mError in flow.js with creating visualisation data fileTree): ${err.message}\x1b[37m`
     );
   }
 
