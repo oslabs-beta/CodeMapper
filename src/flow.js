@@ -1,47 +1,76 @@
-// temporary, for seeing the output
 const fs = require('fs');
-const PATH = require('path');
-const { generateTree } = require('./generateFileTree');
-// const createStructureResult = require('./createStructureResult');
+const path = require('path');
+const chalk = require('chalk');
 const { filterAndParse } = require('./filterAndParse');
-// const createDependencyResult = require('./createDependencyResult');
-// const createFunctionalityResult = require('./createFunctionalityResult');
-// const buildResults = require('./buildResults');
+const { writeFoamTreeData } = require('./build-results/generateFoamTreeData');
+const {
+  generateDependencyData,
+} = require('./build-results/generateDependencyData');
+const { writeTreeMapData } = require('./build-results/generateTreeMapData');
+const generateHTMLfiles = require('./build-results/generateHTMLfiles.js');
+const open = require('open');
 
-async function flow() {
-  // collect root and options from the user using the command line
-
-
-  // this will be set by the user later. setting it manually for now
-  const root = PATH.resolve(__dirname, './');
-  console.log('flow.js root =', root);
-  const include = [];
-  const exclude = ['node_modules', '.git', 'testfiles', '.vscode'];
-
+async function flow(fileTree, pathToDir) {
   // call generateTree with the root path passed in
-  const fileTree = await generateTree(root, include, exclude);
+  // const fileTree = await generateTree(root, include, exclude);
+  // make a container folders for reqiured CodeMapper's files
+  if (!fs.existsSync(`${pathToDir}/CodeMapper`)) {
+    fs.mkdirSync(`${pathToDir}/CodeMapper`);
+  }
+  if (!fs.existsSync(`${pathToDir}/CodeMapper/Data`)) {
+    fs.mkdirSync(`${pathToDir}/CodeMapper/Data`);
+  }
+  if (!fs.existsSync(`${pathToDir}/CodeMapper/Visualization`)) {
+    fs.mkdirSync(`${pathToDir}/CodeMapper/Visualization`);
+  }
 
-  // these two could be concurrent
-    // call createStructureResult with the file tree passed in
-    // const structure = createStructureResult(fileTree);
+  //generates html files for the visualization in the project directory
+  // console.log(path.resolve(process.cwd(), `visualization`));
+  await generateHTMLfiles(
+    path.resolve(process.cwd(), `visualization`),
+    `${pathToDir}/CodeMapper/Visualization`
+  );
 
-    // call filter, passing in the file tree, to get an array of pointers to the JS file objects
-    // this will also pass all the js files to the parser
-  filterAndParse(fileTree);
-  fs.writeFileSync('testfiles/finalTree.json', JSON.stringify(fileTree));
-  console.log('All done! look in testfiles/finalTree.json to see the current result.');
+  try {
+    if (fileTree !== undefined) {
+      // call filter, passing in the file tree, to get an array of pointers to the JS file objects
+      // this will also pass all the js files to the parser
+      filterAndParse(fileTree);
+    }
+  } catch (err) {
+    console.error(
+      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`
+    );
+  }
+  try {
+    // our original fileTree should now be modified to give us what we need for generating other results
+    // we're going to pass that into generateDependencyData so that we can convert it into the correct type
+    // for treeMap chart
+    await Promise.all([
+      writeTreeMapData(fileTree, pathToDir),
+      generateDependencyData(fileTree, [], pathToDir),
+    ]);
+    // writeTreeMapData(fileTree, pathToDir);
+    // // for the dependency wheel
+    // generateDependencyData(fileTree, [], pathToDir);
+    // create treemap data for foamtree version of the treemap
+    // writeFoamTreeData(fileTree);
+  } catch (err) {
+    console.error(
+      `\n\x1b[31mError in flow.js with creating visualisation data fileTree): ${err.message}\x1b[37m`
+    );
+  }
 
-  // our original fileTree should now be modified to give us what we need for generating other results
-  // so we'll pass it to our other results-generating functions
-  // these can happen concurrently
-    // const dependencies = createDependencyResult(fileTree);
-    // const functionality = createFunctionalityResult(fileTree);
-
-  // put all the results into an array
-  // const results = [structure, dependencies, functionality];
-
-  // and then call something like this to build the page:
-  // buildResults(results);
+  (async () => {
+    await open(`${pathToDir}/CodeMapper/Visualization/index.html`, {
+      wait: false,
+    });
+  })();
+  console.log(
+    chalk.greenBright(
+      `And we're done! To view the results, open the index.html file we've generated in the ${pathToDir}/CodeMapper/Visualization folder in any up-to-date browser.`
+    )
+  );
 }
-
-flow();
+// flow();
+module.exports = flow;

@@ -1,3 +1,9 @@
+# Local files for testing
+data
+
+# VSCode settings
+.vscode
+
 # Logs
 logs
 *.log
@@ -102,3 +108,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# data folder
+data/

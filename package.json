@@ -1,31 +1,41 @@
 {
   "name": "codemapper",
   "version": "1.0.0",
-  "description": "",
+  "description": "Analyzes a codebase to give results about the project, particularly the javascript files. You can get a visual or non-visual representation of the project at a high-level along with and the imports, exports, and function definitions and calls for all JS files.",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/getUserInput.js",
+    "start": "node src/collectInputs.js",
+    "generate": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BeckettH/CodeMapper.git"
+    "url": "git+https://github.com/oslabs-beta/CodeMapper.git"
   },
   "author": "RabbitHole",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/BeckettH/CodeMapper/issues"
+    "url": "https://github.com/oslabs-beta/CodeMapper/issues"
   },
-  "homepage": "https://github.com/BeckettH/CodeMapper#readme",
+  "homepage": "https://github.com/oslabs-beta/CodeMapper#readme",
   "dependencies": {
     "@babel/core": "^7.11.0",
     "@babel/generator": "^7.11.0",
     "@babel/parser": "^7.11.0",
+    "@babel/plugin-syntax-jsx": "^7.10.4",
+    "@babel/preset-env": "^7.11.0",
+    "@babel/preset-flow": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
+    "@babel/preset-typescript": "^7.10.4",
     "@babel/traverse": "^7.11.0",
-    "@nodelib/fs.walk": "^1.2.4",
+    "chalk": "^4.1.0",
+    "figlet": "^1.5.0",
     "fs": "0.0.1-security",
-    "js2flowchart": "^1.3.2",
-    "path": "^0.12.7",
-    "util": "^0.12.3"
+    "inquirer": "^7.3.3",
+    "open": "^7.3.0",
+    "path": "^0.12.7"
+  },
+  "bin": {
+    "codemapper": "./src/collectInputs.js"
   }
 }
