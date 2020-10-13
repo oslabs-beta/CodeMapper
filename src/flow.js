@@ -43,6 +43,15 @@ async function flow(fileTree, pathToDir) {
     );
   }
   try {
+    fs.writeFile(
+      // PATH.resolve(__dirname, '../../data/treeMapData.js'),
+      `${pathToDir}/CodeMapper/Data/fileFree.js`,
+      `const treeMapData = ${JSON.stringify(fileTree, null, 2)}`,
+      // 'utf8',
+      (err) => {
+        if (err) throw err;
+      }
+    );
     // our original fileTree should now be modified to give us what we need for generating other results
     // we're going to pass that into generateDependencyData so that we can convert it into the correct type
     // for treeMap chart

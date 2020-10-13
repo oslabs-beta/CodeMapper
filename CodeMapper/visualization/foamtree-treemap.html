@@ -18,15 +18,44 @@
         <!-- Instructions on how to interact with the FT visualization -->
         <div class="side">
           <h2>Instructions</h2>
-          <p>To the left is a graphic showing the file and folder structure of your project.</p><br>
-          <p>If a file can be found at the root level, it will be displayed as a box without a header. If it is inside a folder, it will have a header section
-            above the blocks for all the files and nested folders that can be found inside it.</p><br>
-          <p>Some files or folders have names that don't fit into this graphic dependending on the size of the screen it's rendering on. These names will be represented by ellipses(...). 
-          To find out what their titles are, you can hover over them with a mouse or use a mouse to scroll while your cursor is on the graphic.
-          This will zoom into the area around where your cursor is. This can also make titles easier to see.</p><br>
-          <p>You can also click and drag the graphic around to look at different areas of it.</p><br>
-          <p>To learn more about a Javascript file, click the box with its name. In the right sidebar, these instructions will be replaced with the information about that particular file.</p><br>
-          <p>To navigate inside a folder, click the box with its name and the graphic will change to show only the relevant files and nested folders within that folder.</p>
+          <p>
+            To the left is a graphic showing the file and folder structure of
+            your project.
+          </p>
+          <br />
+          <p>
+            If a file can be found at the root level, it will be displayed as a
+            box without a header. If it is inside a folder, it will have a
+            header section above the blocks for all the files and nested folders
+            that can be found inside it.
+          </p>
+          <br />
+          <p>
+            Some files or folders have names that don't fit into this graphic
+            dependending on the size of the screen it's rendering on. These
+            names will be represented by ellipses(...). To find out what their
+            titles are, you can hover over them with a mouse or use a mouse to
+            scroll while your cursor is on the graphic. This will zoom into the
+            area around where your cursor is. This can also make titles easier
+            to see.
+          </p>
+          <br />
+          <p>
+            You can also click and drag the graphic around to look at different
+            areas of it.
+          </p>
+          <br />
+          <p>
+            To learn more about a Javascript file, click the box with its name.
+            In the right sidebar, these instructions will be replaced with the
+            information about that particular file.
+          </p>
+          <br />
+          <p>
+            To navigate inside a folder, click the box with its name and the
+            graphic will change to show only the relevant files and nested
+            folders within that folder.
+          </p>
           <div id="details"></div>
         </div>
         <!-- /side -->
@@ -50,6 +79,136 @@
         }
       });
       console.log(closeBtn);
+      window.addEventListener('load', () => {
+        // Perform FoamTree embedding here
+        if (CarrotSearchFoamTree.supported) {
+          const foamtree = new CarrotSearchFoamTree({
+            id: 'data-vis',
+            dataObject: foamTreeDataObj,
+            layout: 'ordered',
+            layoutByWeightOrder: true,
+            stacking: 'flattened',
+            descriptionGroupSize: 0.12,
+            descriptionGroupDistanceFromCenter: 0,
+            groupLabelFontFamily: 'Oxygen',
+            groupLabelMinFontSize: 16,
+            groupLabelMaxFontSize: 24,
+            groupLabelVerticalPadding: 0.1,
+            groupLabelHorizontalPadding: 0.8,
+            groupLabelLineHeight: 1.3,
+            groupBorderRadius: 0,
+            groupBorderWidth: 1,
+            groupInsetWidth: 0,
+            groupStrokeWidth: 1,
+            maxGroupLevelsDrawn: 4,
+            maxGroupLabelLevelsDrawn: 4,
+          });
+
+          window.addEventListener(
+            'resize',
+            (() => {
+              let timeout;
+              return () => {
+                window.clearTimeout(timeout);
+                timeout = window.setTimeout(foamtree.resize, 300);
+              };
+            })()
+          );
+
+          // set some additional properties for the foamTree object
+          foamtree.set({
+            groupFillType: 'plain',
+            groupLabelColorThreshold: -1,
+            groupLabelDarkColor: '#192a56',
+            rainbowStartColor: '#f5f6fa',
+            rainbowEndColor: '#f5f6fa',
+            rainbowLightnessCorrection: 0,
+            rainbowColorDistribution: 'linear',
+            groupBorderRadius: 0,
+            onGroupClick(event) {
+              event.preventDefault();
+              const data = event.group;
+
+              console.log(data);
+              const html = ejs.render(
+                ` <h3>
+          <%= data.label %>
+          </h3>
+          <% if (data.imported) { %>
+            <h4>Imports</h4>
+            <ul>
+              <% data.imported.forEach((obj)=>{ %>
+                <li class="pink">
+                  <%= obj.fileName %>
+                </li>
+                <% }) %>
+            </ul>
+          <% } %>
+    
+          <% if (data.functionDeclarations) { %>
+            <h4>Function Declarations</h4>
+            <ul>
+              <% data.functionDeclarations.forEach((obj)=>{ %>
+                <li class="blue">
+                  <%= obj.name %>
+                 <span>
+                  (
+                  <%= obj.parameters %>
+                  )
+                  </span>
+                </li>
+                <% }) %>
+            </ul>
+          <% } %>
+          <% if (data.functionCalls) { %>
+            <h4>Function Calls</h4>
+            <ul>
+              <% data.functionCalls.forEach((obj)=>{ %>
+                <li class="green">
+                  <%= obj.name %>
+                  <span>
+                    (
+                      <% obj.arguments.forEach((el)=>{ %>
+                        <%  console.log(el) %>
+                        <% if( el === null ) { 'null'  %>
+                          <% } else if (typeof el === 'object') { %>
+                            
+                            <%= el.callbackName %> 
+                            
+                          
+                            <% } else {%>
+                              <%= el %>
+                              <% } %>
+                          <% }) %>
+                        
+                    )
+                    </span>
+                </li>
+                <% }); %>
+            </ul>
+          <% } %>
+          
+          
+          
+          
+          
+          
+          `,
+
+                { data }
+              );
+              document.getElementById('details').innerHTML = html;
+              document.getElementById('details').classList.add('opened');
+
+              const closeBtn = document.getElementById('container');
+              console.log(closeBtn);
+            },
+          });
+          foamtree.redraw();
+        } else {
+          console.log('Unsupported browser for FoamTree visualizations');
+        }
+      });
     </script>
 
     <!-- <a href="/dependency-wheel.html" class="button">See Dependencies</a> -->

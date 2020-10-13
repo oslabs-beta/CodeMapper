@@ -31,10 +31,22 @@ const generateTreeMapData = (data, parentId) => {
 
     const newPoint = {
       name: data[item].name,
+
       color: colors[Math.round(Math.random() * 20)],
-      // colorValue: Math.round(Math.random() * 100),
-      // colorValue: Math.round(data[item].size / 100),
     };
+    if (data[item].functionCalls) {
+      newPoint.functionCalls = data[item].functionCalls;
+    }
+    if (data[item].imported) {
+      newPoint.imported = data[item].imported;
+    }
+    if (data[item].functionDeclarations) {
+      newPoint.functionDeclarations = data[item].functionDeclarations;
+    }
+    if (data[item].exported) {
+      newPoint.exported = data[item].exported;
+    }
+
     if (parentId) {
       newPoint.parent = `${parentId}`;
       newPoint.id = `${parentId}_${item.toString()}`;

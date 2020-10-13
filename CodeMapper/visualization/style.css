@@ -17,7 +17,7 @@ body {
   display: grid;
   place-items: center;
   background-color: #1e272e;
-/*   background-color: #474848; */
+  /*   background-color: #474848; */
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 16px;
 }
@@ -200,11 +200,11 @@ li {
   max-height: 2.5rem;
   overflow: hidden;
 }
-.blue {
+.yellow {
   color: #ffd635;
   font-weight: 600;
 }
-.blue > span {
+.yellow > span {
   color: white;
   font-weight: 400;
 }
@@ -224,6 +224,14 @@ li {
   color: white;
   font-weight: 400;
 }
-canvas {
+.blue {
+  color: #03a9f4;
+  font-weight: 600;
+}
+.blue > span {
+  color: white;
+  font-weight: 400;
+}
+#03a9f4 canvas {
   cursor: pointer;
 }

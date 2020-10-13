@@ -10,10 +10,10 @@
     <title>CodeMapper - Project Tree</title>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/data.js"></script>
-    <!-- <script src="https://code.highcharts.com/modules/heatmap.js"></script> -->
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
     <script src="https://code.highcharts.com/modules/treemap.js"></script>
-    <!-- <script src="https://code.highcharts.com/modules/exporting.js"></script> -->
-    <!-- <script src="https://code.highcharts.com/modules/export-data.js"></script> -->
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <link type="text/css" rel="stylesheet" href="style.css" />
   </head>
@@ -385,22 +385,27 @@
     text: 'Project content',
   },
 
-  
+  click : function(e) {
+    console.log(e) 
+  }
 });
 
 
+const chart = document.querySelector('.highcharts-figure');
+// console.log(chart);
 
- 
-      // let isMenuOpen = false;
-      // $menuBtn.addEventListener('click', () => {
-      //   if (!isMenuOpen) {
-      //     $menuBtn.classList.add('open');
-      //   } else {
-      //     $menuBtn.classList.remove('open');
-      //   }
+chart.addEventListener('click', (e) => {
+  // if (closeBtn.classList.contains('opened')) {
+  //   closeBtn.classList.remove('opened');
+  // } else {
+  //   closeBtn.classList.add('opened');
+  // }
+  if (e.point.node.children.length === 0) {
+    console.log('node name', e.node);
+  }
+});
 
-      //   isMenuOpen = !isMenuOpen;
-      // });
+
     </script>
   </body>
 </html>
