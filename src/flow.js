@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const chalk = require('chalk');
 const open = require('open');
 const { filterAndParse } = require('./filterAndParse');
@@ -21,7 +22,7 @@ async function flow(fileTree, pathToDir) {
   // generate html files for the Visualization directory
   try {
     await generateHTMLfiles(
-      '../visualization',
+      path.resolve(__dirname, '../visualization'),
       `${pathToDir}/CodeMapper/Visualization`,
     );
   } catch (e) {
