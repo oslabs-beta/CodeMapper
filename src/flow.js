@@ -21,10 +21,10 @@ async function flow(fileTree, pathToDir) {
 
   // generate html files for the Visualization directory
   try {
-    await generateHTMLfiles(
-      path.resolve(__dirname, '/visualization'),
-      `${pathToDir}/CodeMapper/Visualization`,
-    );
+    const pathToSource = path.resolve(__dirname, '../visualization');
+    const dirPath = `${pathToDir}/CodeMapper/Visualization`;
+    console.log('paths are ', pathToSource, ' and ', dirPath);
+    await generateHTMLfiles(pathToSource, dirPath);
   } catch (e) {
     console.log('Error while trying to generate the html files: ', e);
   }
