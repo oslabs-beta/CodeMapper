@@ -19,10 +19,14 @@ async function flow(fileTree, pathToDir) {
   }
 
   // generate html files for the Visualization directory
-  await generateHTMLfiles(
-    '../visualization',
-    `${pathToDir}/CodeMapper/Visualization`,
-  );
+  try {
+    await generateHTMLfiles(
+      '../visualization',
+      `${pathToDir}/CodeMapper/Visualization`,
+    );
+  } catch (e) {
+    console.log('Error while trying to generate the html files: ', e);
+  }
 
   try {
     if (fileTree !== undefined) {
