@@ -1,11 +1,11 @@
 const fs = require('fs');
-const path = require('path');
 
-// create a function that can accept the tree and iterate over it
+// this function accept the filetree and iterates over it
 // to generate import and export data as an array of arrays
-// where each inner array has the exporting file first, the importing file second
-// and the number 1 (necessary to represent the weight of the line
-// we want to draw between the two - for now we'll have them all be equal)
+// where each inner array has the exporting file first, the importing file
+// second, and then the number 1 (necessary to represent the weight of the
+// line we want to draw between the two - for now we'll have them all be 1,
+// later it would be ideal to show how many things are being exported/imported)
 const generateDependencyData = (finalTree, importExportData, pathToDir) => {
   // iterate over the array in the final tree
   for (let i = 0; i < finalTree.length; i += 1) {
