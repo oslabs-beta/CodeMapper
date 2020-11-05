@@ -1,38 +1,9 @@
+/* eslint-disable max-len */
 const { parse } = require('@babel/parser');
-const babel = require('@babel/core');
 const traverse = require('@babel/traverse').default;
 const generate = require('@babel/generator').default;
 const fs = require('fs');
-const PATH = require('path');
 const { transform } = require('./transform');
-
-// this function is only for dev and can be removed for production
-const createAST = (filePath) => {
-  // this gets used by transformSync to generate our AST (only used in dev)
-  let source;
-  try {
-    source = fs.readFileSync(filePath, 'utf8');
-  } catch (err) {
-    console.log(`Found an error while reading a file to generate a dev AST for it: ${err}`);
-  }
-
-  try {
-    // create the AST just for us to see and work with temporarily (won't be used for end user)
-    const { ast } = babel.transformSync(source, {
-      filename: filePath,
-      ast: true,
-      code: true,
-    });
-
-    // write the ast to a file (temporary)
-    fs.writeFileSync(
-      PATH.resolve(__dirname, '../data/data.json'),
-      JSON.stringify(ast, null, 2),
-    );
-  } catch (err) {
-    console.log(`error while creating ast for dev purposes. error is ${err}`);
-  }
-};
 
 // we can use this directly if we'd rather pass each file to the parser one at a time
 const fileParser = (fileObject, filePath) => {
@@ -41,7 +12,7 @@ const fileParser = (fileObject, filePath) => {
   try {
     readFile = fs.readFileSync(filePath).toString();
   } catch (err) {
-    console.log(`Found an error while reading a file to generate the official AST for it: ${err}`);
+    console.log(`Found an error while reading a file to generate the official AST for it: ${err}. File is ${fileObject.name}`);
   }
 
   // this parses the file into an AST so we can traverse it
@@ -52,7 +23,7 @@ const fileParser = (fileObject, filePath) => {
       plugins: ['jsx', 'typescript'],
     });
   } catch (err) {
-    console.log(`error while creating ast for traversing. error is ${err}`);
+    console.log(`Error while creating ast for traversing. Error is ${err} and relevant file is ${fileObject.name}`);
   }
 
   // this allows us to traverse the AST
@@ -68,9 +39,9 @@ const fileParser = (fileObject, filePath) => {
         if (node.id) {
           name = node.id.name;
         }
-        const params = node.params;
-        const async = node.async;
-        const type = node.type;
+        const { params } = node;
+        const { async } = node;
+        const { type } = node;
         const method = false;
         const definition = generate(node).code;
         transform.functionDefinition(fileObject, name, params, async, type, method, definition);
@@ -83,10 +54,10 @@ const fileParser = (fileObject, filePath) => {
       // This handles the arrow functions
       try {
         if (node.declarations[0].init && node.declarations[0].init.type === 'ArrowFunctionExpression') {
-          const name = node.declarations[0].id.name;
+          const { name } = node.declarations[0].id;
           const params = node.declarations[0].init.params || [];
-          const async = node.declarations[0].init.async;
-          const type = node.declarations[0].init.type;
+          const { async } = node.declarations[0].init;
+          const { type } = node.declarations[0].init;
           const method = false;
           const definition = generate(node).code;
           transform.functionDefinition(fileObject, name, params, async, type, method, definition);
@@ -181,14 +152,17 @@ const fileParser = (fileObject, filePath) => {
     ExpressionStatement({ node }) {
       try {
         if (node.expression.right && node.expression.left) {
+          let name;
           const { type } = node.expression.right;
           if (
             type === 'ArrowFunctionExpression' ||
             type === 'FunctionExpression'
           ) {
-            const name =
-              `${node.expression.left.object.name}.${node.expression.left.property.name}` ||
-              'anonymousMethod';
+            if (node.expression.left.object && node.expression.left.property) {
+              name = `${node.expression.left.object.name}.${node.expression.left.property.name}`;
+            } else {
+              name = 'anonymousMethod';
+            }
             const params = node.expression.right.params || [];
             const { async } = node.expression.right;
             const method = true;
@@ -205,7 +179,7 @@ const fileParser = (fileObject, filePath) => {
           }
         }
       } catch (err) {
-        console.log(`Found an error while parsing a class method: ${err}`);
+        console.log(`Found an error while parsing a class method: ${err}.`);
       }
 
       // this handles module exports
@@ -288,7 +262,7 @@ const fileParser = (fileObject, filePath) => {
 
       // for regular functions
       try {
-        if (node.callee.type !== 'Import') {
+        if (node.callee && node.callee.type !== 'Import') {
           if (node.callee && node.callee.name) {
             // handling all regular function calls except require statements here
             if (node.callee.name) {
@@ -327,10 +301,11 @@ const fileParser = (fileObject, filePath) => {
 
           const args = node.arguments;
 
+          // console.log('type in parser is ', type);
           transform.functionCall(fileObject, name, type, args);
         }
       } catch (err) {
-        console.log(`Found an error while trying to get the name, type, and args of a regular function or method call that is not an import statement: ${err}`);
+        console.log(`Found an error while gettings details of a regular function/method call that is not an import statement: ${err}.`);
       }
 
       // or if object type is call expression, then it's in a chain of methods, so we won't have the object name but we still get the method name
@@ -555,18 +530,14 @@ const fileParser = (fileObject, filePath) => {
     },
   };
 
-  // this traverses the AST (parsedFile) using the visitor object to determine what to do with the AST
+  // this traverses the AST (parsedFile) and uses the visitor object to determine what to do
+  // with each part of the AST. this data all gets added to the fileTree
   traverse(parsedFile, visitor);
-  // once this is done, we should see the data in a file called functions.js
-  // this is a temporary way to easily look at the data. In the end we will be adding to the fileTree
-  // rather than pushing this data to a file
 };
 
-// this is just an easy wrapper for calling both of the above functions.
-// later we can just export the fileParser and delete all the AST stuff
+// this is just an easy wrapper for calling the fileParser
 const parser = (fileObject) => {
   const filePath = fileObject.fullname;
-  createAST(filePath);
   fileParser(fileObject, filePath);
 };
 

@@ -16,7 +16,8 @@ body {
 body {
   display: grid;
   place-items: center;
-  background-color: #474848;
+  background-color: #1e272e;
+/*   background-color: #474848; */
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 16px;
 }
@@ -57,42 +58,35 @@ p {
 }
 
 button {
-  padding: 5px 10px;
+  padding: 7px 23px;
   background-color: #e0e0e0;
   font-size: 1rem;
-  font-weight:bold;
-  border-radius: 5px;
+  border-radius: 3px;
   border: none;
   margin: 10px;
 }
 
-#chart-and-instruction-block {
-  display: flex;
-  height: 600px;
-  /* align-content: space-around; */
+#treemap-container {
+  width: 80%;
 }
 
-#container {
-  width: 50%;
-  margin: 10px 5px 10px 10px;
-}
-
-#dependency-instructions {
-  width: 50%;
-  margin: 10px 10px 10px 5px;
-  padding: 15px;
-  background-color: #e0e0e0;
+#dependency-wheel-container {
+  width: 80%;
 }
 
 .highcharts-data-table {
   background-color: #e0e0e0;
 }
 
-#visual-container {
+.highcharts-container {
+  font-family: 'Helvetica', sans-serif;
+  text-shadow: none;
+}
+
+.visual-container {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: space-evenly;
   width: 100%;
   height: 100%;
   align-items: stretch;
@@ -104,7 +98,7 @@ button {
   flex: 1 1 auto;
 }
 
-#side {
+.side {
   background-color: #fff;
   padding: 1rem;
   position: relative;
@@ -206,11 +200,11 @@ li {
   max-height: 2.5rem;
   overflow: hidden;
 }
-.blue {
+.yellow {
   color: #ffd635;
   font-weight: 600;
 }
-.blue > span {
+.yellow > span {
   color: white;
   font-weight: 400;
 }
@@ -229,6 +223,14 @@ li {
 .green > span {
   color: white;
   font-weight: 400;
+}
+.blue {
+  color: #03a9f4;
+  font-weight: 600;
+}
+.blue > span {
+  color: white;
+  font-weight:400;
 }
 canvas {
   cursor: pointer;

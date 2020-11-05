@@ -4,7 +4,7 @@
   "description": "Analyzes a codebase to give results about the project, particularly the javascript files. You can get a visual or non-visual representation of the project at a high-level along with and the imports, exports, and function definitions and calls for all JS files.",
   "main": "index.js",
   "scripts": {
-    "start": "node src/getUserInput.js",
+    "start": "node src/collectInputs.js",
     "generate": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -28,10 +28,14 @@
     "@babel/preset-react": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
     "@babel/traverse": "^7.11.0",
-    "browserify": "^16.5.2",
+    "chalk": "^4.1.0",
+    "figlet": "^1.5.0",
     "fs": "0.0.1-security",
     "inquirer": "^7.3.3",
+    "open": "^7.3.0",
     "path": "^0.12.7"
   },
-  "devDependencies": {}
+  "bin": {
+    "codemapper": "./src/collectInputs.js"
+  }
 }

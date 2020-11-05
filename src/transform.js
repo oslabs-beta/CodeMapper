@@ -1,8 +1,8 @@
-const generate = require('@babel/generator').default;
-// for dev us if needed since fs can write results to a file for us to look over
-// const fs = require('fs');
-// this file will transform the data from the babel traversing a file into
+/* eslint-disable no-param-reassign */
+// this file transforms the data from the babel traversing a file into
 // a usable structure by giving the visitor useful methods for traversal
+
+const generate = require('@babel/generator').default;
 
 const transform = {};
 
@@ -109,7 +109,6 @@ const handleLogicalExpressions = (parent, result = '') => {
   const { right } = parent;
   const { operator } = parent;
 
-  // console.log(`right is ${JSON.stringify(right)} and left is ${JSON.stringify(left)} and result is ${result}`);
   // we always start by adding the right side to the beginning
   if (right) {
     if (right.value) {
@@ -135,6 +134,13 @@ const handleLogicalExpressions = (parent, result = '') => {
         result = `${operator} ${right.name}`;
       }
     }
+    if (right.operator) {
+      if (right.type === 'UnaryExpression') {
+        if (result) {
+          result = `${operator} ${right.operator} ${right.argument.value}`;
+        }
+      }
+    }
   }
 
   // termination case
@@ -156,13 +162,18 @@ const handleLogicalExpressions = (parent, result = '') => {
     return result;
   }
 
+  if (left.type === 'MemberExpression') {
+    // put together the name and return the result
+    result = `${left.object.name}.${left.property.name} ${result}`;
+    return result;
+  }
+
   // otherwise, recurse
   return handleLogicalExpressions(left, result);
 };
 
 // turns function calls into the data we need and adds it to the file tree
 transform.functionCall = (fileObject, name, type, args) => {
-  // console.log('got into function call');
   const functionInfo = {};
 
   // check for the name
@@ -173,98 +184,107 @@ transform.functionCall = (fileObject, name, type, args) => {
     functionInfo.name = 'anonymous';
   }
 
-  // add type - function, method, or anonymous method
-  functionInfo.type = type;
+  try {
+    // add type - function, method, or anonymous method
+    functionInfo.type = type;
+  } catch (error) {
+    console.log(`Ran into issues with adding the type to the function info. Type is ${type}. Error is ${error}`);
+  }
+
   functionInfo.arguments = [];
 
-  if (args.length) {
-    for (let i = 0; i < args.length; i += 1) {
-      // console.log(args[i]);
-      const arg = args[i];
-      let label;
-      let argObject;
-      // number or function call or variable
-      if (arg.value) {
-        if (arg.type === 'StringLiteral') {
-          label = `'${arg.value}'`;
-        } else {
+  try {
+    if (args.length) {
+      for (let i = 0; i < args.length; i += 1) {
+        const arg = args[i];
+        let label;
+        let argObject;
+        // number or function call or variable
+        if (arg.value) {
+          if (arg.type === 'StringLiteral') {
+            label = `'${arg.value}'`;
+          } else {
+            label = arg.value;
+          }
+        } else if (arg.type === 'NullLiteral') {
+          label = 'null';
+        } else if (arg.type === 'NumericLiteral') {
           label = arg.value;
-        }
-      } else if (arg.type === 'NullLiteral') {
-        label = 'null';
-      } else if (arg.type === 'NumericLiteral') {
-        label = arg.value;
-      } else if (arg.type === 'TemplateLiteral') {
-        label = JSON.stringify(generate(args[i]).code);
-      } else if (arg.callee && arg.callee.name) {
-        label = arg.callee.name;
-      } else if (arg.name) {
-        label = arg.name;
-      } else if (arg.type === 'ArrowFunctionExpression') {
-        const node = arg;
-        let callbackName;
-        if (node.id) {
-          callbackName = node.id.name;
-        } else {
-          // this adds a whole object for the function definition
-          callbackName = 'anonymousFunction';
-          const nodeParams = node.params || [];
+        } else if (arg.type === 'TemplateLiteral') {
+          label = JSON.stringify(generate(args[i]).code);
+        } else if (arg.type === 'LogicalExpression') {
+          label = handleLogicalExpressions(arg);
+        } else if (arg.callee && arg.callee.name) {
+          label = arg.callee.name;
+        } else if (arg.name) {
+          label = arg.name;
+        } else if (arg.type === 'ArrowFunctionExpression') {
+          const node = arg;
+          let callbackName;
+          if (node.id) {
+            callbackName = node.id.name;
+          } else {
+            // this adds a whole object for the function definition
+            callbackName = 'anonymousFunction';
+            const nodeParams = node.params || [];
 
-          // check for the arguments and add them to an array
-          const callbackParams = [];
-          if (nodeParams.length) {
-            for (let i = 0; i < nodeParams.length; i += 1) {
-              // this is for simple parameter names
-              if (nodeParams[i].name) {
-                callbackParams.push(nodeParams[i].name);
-              } else if (nodeParams[i].left.name) {
-                // this is for parameters that have a default assignment
-                callbackParams.push(
-                  `${nodeParams[i].left.name} = ${JSON.stringify(
-                    nodeParams[i].right.elements
-                  )}`
-                );
+            // check for the arguments and add them to an array
+            const callbackParams = [];
+            if (nodeParams.length) {
+              for (let i = 0; i < nodeParams.length; i += 1) {
+                // this is for simple parameter names
+                if (nodeParams[i].name) {
+                  callbackParams.push(nodeParams[i].name);
+                } else if (nodeParams[i].left.name) {
+                  // this is for parameters that have a default assignment
+                  callbackParams.push(
+                    `${nodeParams[i].left.name} = ${JSON.stringify(
+                      nodeParams[i].right.elements
+                    )}`
+                  );
+                }
               }
             }
-          }
 
-          const { async } = node;
-          const { type } = node;
-          const method = false;
-          const definition = generate(node).code;
-          argObject = {
-            callbackName,
-            callbackParams,
-            async,
-            type,
-            method,
-            definition,
-          };
-        }
-      } else if (arg.type === 'LogicalExpression') {
-        // console.log('got into logical expression for arg ', arg);
-        // call helper function
-        label = handleLogicalExpressions(arg);
-      } else if (arg.type === 'CallExpression') {
-        if (arg.callee && arg.callee.name) {
-          label = arg.callee.name;
-        } else if (arg.callee.object && arg.callee.property) {
-          if (args.arguments) {
-            // grab the inner arguments
-            const innerArgs = [];
-            for (let j = 0; i < args.arguments.length; j += 1) {
-              innerArgs.push(JSON.stringify(generate(innerArgs[j]).code));
-            }
-            label = `${arg.callee.object.name}.${arg.callee.property.name}(${innerArgs.slice(1, -1)})`;
-          } else {
-            label = `${arg.callee.object.name}.${arg.callee.property.name}()`;
+            const { async } = node;
+            const argType = node.type;
+            const method = false;
+            const definition = generate(node).code;
+            argObject = {
+              callbackName,
+              callbackParams,
+              async,
+              type: argType,
+              method,
+              definition,
+            };
           }
+        } else if (arg.type === 'LogicalExpression') {
+          // call helper function
+          label = handleLogicalExpressions(arg);
+        } else if (arg.type === 'CallExpression') {
+          if (arg.callee && arg.callee.name) {
+            label = arg.callee.name;
+          } else if (arg.callee.object && arg.callee.property) {
+            if (args.arguments) {
+              // grab the inner arguments
+              const innerArgs = [];
+              for (let j = 0; i < args.arguments.length; j += 1) {
+                innerArgs.push(JSON.stringify(generate(innerArgs[j]).code));
+              }
+              label = `${arg.callee.object.name}.${arg.callee.property.name}(${innerArgs.slice(1, -1)})`;
+            } else {
+              label = `${arg.callee.object.name}.${arg.callee.property.name}()`;
+            }
+          }
+        } else if (arg.type === 'MemberExpression') {
+          label = JSON.stringify(generate(args[i]).code);
         }
-      } else if (arg.type === 'MemberExpression') {
-        label = JSON.stringify(generate(args[i]).code);
+        functionInfo.arguments.push(label || argObject);
       }
-      functionInfo.arguments.push(label || argObject);
     }
+  } catch (err) {
+    console.log(`Error while trying to save arguments into filetree. Error is ${err}`);
   }
 
   // and then add it into the file tree

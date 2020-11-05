@@ -18,7 +18,7 @@ const filterAndParse = (folder, jsFileArray = []) => {
       // if isDirectory was false, this is a file, so check if this object has extension ".js"
       // if it does, add the object to our jsFileArray
       jsFileArray.push(current);
-      // we could call parse because it's a JS file
+      // and then we call parser because it's a JS file
       parser(current);
     }
   }
