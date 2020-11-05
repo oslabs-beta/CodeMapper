@@ -200,11 +200,11 @@ li {
   max-height: 2.5rem;
   overflow: hidden;
 }
-.blue {
+.yellow {
   color: #ffd635;
   font-weight: 600;
 }
-.blue > span {
+.yellow > span {
   color: white;
   font-weight: 400;
 }
@@ -223,6 +223,14 @@ li {
 .green > span {
   color: white;
   font-weight: 400;
+}
+.blue {
+  color: #03a9f4;
+  font-weight: 600;
+}
+.blue > span {
+  color: white;
+  font-weight:400;
 }
 canvas {
   cursor: pointer;
