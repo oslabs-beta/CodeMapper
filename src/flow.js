@@ -22,7 +22,7 @@ async function flow(fileTree, pathToDir) {
   // generate html files for the Visualization directory
   try {
     await generateHTMLfiles(
-      path.resolve(__dirname, '../visualization'),
+      path.resolve(__dirname, '/visualization'),
       `${pathToDir}/CodeMapper/Visualization`,
     );
   } catch (e) {
