@@ -4,7 +4,12 @@ const path = require('path');
 // this creates all the html files so the end user can see the results of their codebase analysis
 const generateHTMLfiles = async (pathToSource, pathToDestination) => {
   console.log('got into generateHTMLfiles');
-  const files = await fs.readdir(pathToSource);
+  let files;
+  try {
+    files = await fs.readdir(pathToSource);
+  } catch (err) {
+    console.log('Had trouble getting the source folder. Error: ', err);
+  }
 
   files.forEach(async (file) => {
     try {
