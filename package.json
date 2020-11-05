@@ -1,6 +1,6 @@
 {
   "name": "codemapper",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Analyzes a codebase to give results about the project, particularly the javascript files. You can get a visual or non-visual representation of the project at a high-level along with and the imports, exports, and function definitions and calls for all JS files.",
   "main": "index.js",
   "scripts": {
