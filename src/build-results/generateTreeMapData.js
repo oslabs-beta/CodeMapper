@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable guard-for-in */
 const fs = require('fs');
+
 const points = [];
 const colors = [
   '#d1f510',
@@ -25,16 +26,30 @@ const colors = [
   '#65C6BE',
 ];
 
+// this is where we build out all the data for the nested object representing all the files and folders
+// in particular we add in extra info about JS files - function calls, function definitions, imports, and exports
 const generateTreeMapData = (data, parentId) => {
   for (const item in data) {
     const id = `id_${item.toString()}`;
 
     const newPoint = {
       name: data[item].name,
+
       color: colors[Math.round(Math.random() * 20)],
-      // colorValue: Math.round(Math.random() * 100),
-      // colorValue: Math.round(data[item].size / 100),
     };
+    if (data[item].functionCalls) {
+      newPoint.functionCalls = data[item].functionCalls;
+    }
+    if (data[item].imported) {
+      newPoint.imported = data[item].imported;
+    }
+    if (data[item].functionDeclarations) {
+      newPoint.functionDeclarations = data[item].functionDeclarations;
+    }
+    if (data[item].exported) {
+      newPoint.exported = data[item].exported;
+    }
+
     if (parentId) {
       newPoint.parent = `${parentId}`;
       newPoint.id = `${parentId}_${item.toString()}`;
@@ -57,12 +72,9 @@ async function writeTreeMapData(data, pathToDir) {
   const dataSeries = await generateTreeMapData(data);
 
   // write to the resulting tree object
-
   fs.writeFile(
-    // PATH.resolve(__dirname, '../../data/treeMapData.js'),
     `${pathToDir}/CodeMapper/Data/treeMapData.js`,
     `const treeMapData = ${JSON.stringify(dataSeries, null, 2)}`,
-    // 'utf8',
     (err) => {
       if (err) throw err;
     }

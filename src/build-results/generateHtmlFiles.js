@@ -1,6 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+// this creates all the html files so the end user can see the results of their codebase analysis
 const generateHTMLfiles = async (pathToSource, pathToDestination) => {
   const files = await fs.readdir(pathToSource);
 
@@ -17,7 +18,7 @@ const generateHTMLfiles = async (pathToSource, pathToDestination) => {
         }
       );
     } catch (error) {
-      console.log('The problem comes from here', error);
+      console.log('Error while generating final html files: ', error);
     }
   });
 };

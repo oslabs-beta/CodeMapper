@@ -10,6 +10,7 @@ const flow = require('./flow');
 
 const cwd = process.cwd();
 
+// some things we assume people will want to exclude from their codebase analysis
 const excludes = [
   'LICENSE',
   '.git',
@@ -26,6 +27,7 @@ const excludes = [
   'README.md',
 ];
 
+// ** this is the initial prompt which still needs some validation on the input
 const questions = [
   {
     name: 'projectDirectory',
@@ -33,28 +35,14 @@ const questions = [
     message:
       "Add the full path of the codebase folder you'd like to analyze, or press enter to use the current directory:",
     default: cwd,
-    // default: 'C:\\Users\\Lenovo\\Documents\\PTRI program\\unit-8SB-node-pages',
-    // validate: validatePath,
-  },
-  // {
-  //   name: 'projectDirectory',
-  //   type: 'input',
-  //   message: 'Try again with a valid path',
-  //   // default: cwd,
-  //   // default: 'C:\\Users\\Lenovo\\Documents\\PTRI program\\unit-8SB-node-pages',
-  // },
+  }
 ];
 
 const askQuestions = (question) => {
   return inquirer.prompt(question);
 };
-// const validatePath = (input)=>{
-//   if (input !== 'y' || input !== 'n') {
-//     return 'Incorrect asnwer';
-//   }
-//   return true;
-// };
 
+// this shows our intro message in the CLI
 const init = () => {
   console.log(chalk.magenta('\n\n\n W E L C O M E to'));
   console.log(
@@ -75,14 +63,13 @@ const init = () => {
     `How does it work?
     1. Select the root folder for the codebase you'd like to analyze.
     2. Select the files or folders at the top level of the project that you'd like to include in the analysis.
-    3. Blink and enjoy the result!
-    `
+    3. Blink and enjoy the result!`
   );
 };
 
+// this allows us to show the files and folders at the root level of the codebase
 const buildRootList = async (pathToDir) => {
   const list = [];
-  // const pathToDir1 = pathToDir;
   const rootList = await readdir(pathToDir, { withFileTypes: true });
   rootList.map((el) => {
     const temp = {
@@ -112,7 +99,6 @@ const buildEntireList = async (dir, excluded, depth = 0) => {
   const files = await Promise.all(
     subdirs
       .filter((name) => {
-        // console.log(excluded.indexOf(name) === -1);
         return excluded.indexOf(name) === -1;
       })
       .map(async (subdir) => {
@@ -127,8 +113,6 @@ const buildEntireList = async (dir, excluded, depth = 0) => {
           isDirectory: statistics.isDirectory(),
           size: statistics.size,
         };
-
-        // console.log(name);
         if (statistics.isDirectory()) {
           depth += 1;
           item.content = [];
@@ -148,12 +132,6 @@ const collectData = async () => {
   init();
 
   // ask question 1
-  // console.log(
-  //   chalk.magenta(
-  //     'Press <enter> to continue with the current working directory',
-  //   ),
-  // );
-  // prompt q1-> selection of project directory
   const answers = await askQuestions(questions[0]);
 
   // get the project directory from user input
@@ -170,16 +148,13 @@ const collectData = async () => {
 
   answers.excluded = rootListFiles
     .map((el) => el.name)
-    .filter((el) => answers.included.indexOf(el) == -1);
-  console.log(
-    chalk.magenta("Ok! We're currently analyzing your codebase.")
-    // chalk.magenta('Ok! We\'re currently analyzing your codebase using the following settings:'),
-  );
+    .filter((el) => answers.included.indexOf(el) === -1);
+
+  console.log(chalk.magenta("Ok! We're currently analyzing your codebase."));
 
   const entireList = await buildEntireList(projectDirectory, answers.excluded);
 
   flow(entireList, projectDirectory);
-  // console.log(`project directory ${JSON.stringify(entireList, null, 2)}`);
 };
 
 collectData();
