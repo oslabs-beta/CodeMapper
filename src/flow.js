@@ -21,7 +21,7 @@ async function flow(fileTree, pathToDir) {
 
   // generate html files for the Visualization directory
   await generateHTMLfiles(
-    path.resolve(process.cwd(), 'visualization'),
+    path.resolve(process.cwd(), 'Visualization'),
     `${pathToDir}/CodeMapper/Visualization`,
   );
 
