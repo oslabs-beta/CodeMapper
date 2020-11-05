@@ -34,8 +34,5 @@
     "inquirer": "^7.3.3",
     "open": "^7.3.0",
     "path": "^0.12.7"
-  },
-  "bin": {
-    "codemapper": "./src/collectInputs.js"
   }
 }
