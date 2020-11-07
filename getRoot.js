@@ -1,5 +1,5 @@
 const path = require('path');
 
-console.log(process.env.INIT_CWD);
+console.log(process.env.PWD);
 
-module.exports = path.join(process.env.INIT_CWD, 'visualization');
+module.exports = path.join(process.env.PWD, 'visualization');
