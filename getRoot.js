@@ -1,3 +1,3 @@
 const path = require('path');
 
-module.exports = path.join(process.env.INIT_CWD, 'visualization');
+module.exports = path.join(INIT_CWD, 'visualization');
