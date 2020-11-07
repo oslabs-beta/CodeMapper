@@ -7,7 +7,7 @@ const { filterAndParse } = require('./filterAndParse');
 const { generateDependencyData } = require('./build-results/generateDependencyData');
 const { writeTreeMapData } = require('./build-results/generateTreeMapData');
 const generateHTMLfiles = require('./build-results/generateHtmlFiles');
-const modulePath = require('../getRoot');
+const modulePath = require('../node-module-path');
 
 async function flow(fileTree, pathToDir) {
   // make container folders for required CodeMapper files so we can put them in a person's project

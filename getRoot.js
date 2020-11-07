@@ -3,7 +3,7 @@ const path = require('path');
 
 const data = `const modulePath = '${path.resolve(process.argv[1], '..', '..', 'visualization')}';`;
 console.log('data is ', data);
-const writePath = path.resolve(process.argv[1], '..', 'node-module-path.js');
+const writePath = path.resolve(process.argv[1], '..', '..', 'node-module-path.js');
 console.log('writePath is ', writePath);
 
 try {
