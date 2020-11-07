@@ -7,7 +7,7 @@
     "start": "node src/collectInputs.js",
     "generate": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "cp getRoot.js $INIT_CWD"
+    "postinstall": "cp visualization $INIT_CWD"
   },
   "repository": {
     "type": "git",
