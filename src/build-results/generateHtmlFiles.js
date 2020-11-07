@@ -43,7 +43,8 @@ const generateHTMLfiles = async (pathToSource, pathToDestination) => {
   });
 };
 
+console.log('process.env.INIT_CWD is ', process.env.INIT_CWD, ' and process argv[1] is ', process.argv[1]);
+
 module.exports = generateHTMLfiles;
 
-// console.log('process.env.INIT_CWD is ', process.env.INIT_CWD, ' and process is ', process);
 // generateHTMLfiles(path.resolve(process.env.INIT_CWD, 'visualization'), process.cwd());
