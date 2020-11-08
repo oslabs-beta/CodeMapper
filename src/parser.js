@@ -530,18 +530,14 @@ const fileParser = (fileObject, filePath) => {
     },
   };
 
-  // this traverses the AST (parsedFile) using the visitor object to determine what to do with the AST
+  // this traverses the AST (parsedFile) and uses the visitor object to determine what to do
+  // with each part of the AST. this data all gets added to the fileTree
   traverse(parsedFile, visitor);
-  // once this is done, we should see the data in a file called functions.js
-  // this is a temporary way to easily look at the data. In the end we will be adding to the fileTree
-  // rather than pushing this data to a file
 };
 
-// this is just an easy wrapper for calling both of the above functions.
-// later we can just export the fileParser and delete all the AST stuff
+// this is just an easy wrapper for calling the fileParser
 const parser = (fileObject) => {
   const filePath = fileObject.fullname;
-  // createAST(filePath);
   fileParser(fileObject, filePath);
 };
 

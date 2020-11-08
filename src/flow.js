@@ -1,55 +1,82 @@
 const fs = require('fs');
-const PATH = require('path');
+const path = require('path');
 const chalk = require('chalk');
+const open = require('open');
 const { filterAndParse } = require('./filterAndParse');
-const { writeFoamTreeData } = require('./build-results/generateFoamTreeData');
 const { generateDependencyData } = require('./build-results/generateDependencyData');
 const { writeTreeMapData } = require('./build-results/generateTreeMapData');
+const generateHTMLfiles = require('./build-results/generateHtmlFiles');
 
-async function flow(fileTree) {
-  // call generateTree with the root path passed in
-  // const fileTree = await generateTree(root, include, exclude);
-
-  // make the data folder if it doesn't exist
-  const data = PATH.resolve(__dirname, '../data');
-  if (!fs.existsSync(data)) {
-    fs.mkdirSync(data);
+async function flow(fileTree, pathToDir) {
+  // make container folders for required CodeMapper files so we can put them in a person's project
+  if (!fs.existsSync(`${pathToDir}/CodeMapper`)) {
+    fs.mkdirSync(`${pathToDir}/CodeMapper`);
   }
+  if (!fs.existsSync(`${pathToDir}/CodeMapper/Data`)) {
+    fs.mkdirSync(`${pathToDir}/CodeMapper/Data`);
+  }
+  if (!fs.existsSync(`${pathToDir}/CodeMapper/Visualization`)) {
+    fs.mkdirSync(`${pathToDir}/CodeMapper/Visualization`);
+  }
+
+  // generate html files for the Visualization directory
+  await generateHTMLfiles(
+    path.resolve(process.cwd(), 'visualization'),
+    `${pathToDir}/CodeMapper/Visualization`,
+  );
 
   try {
     if (fileTree !== undefined) {
-      // call filter, passing in the file tree, to get an array of pointers to the JS file objects
-      // this will also pass all the js files to the parser
+      // call filterAndParse on the fileTree to get an array of pointers to the objects
+      // that represent the JS files in the project
+      // this will also pass all the JS files to the parser
       filterAndParse(fileTree);
     }
   } catch (err) {
-    console.error(
-      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`,
-    );
+    // ** we need to show a user friendly error to the CLI here
+    // but for now, this will do **
+    console.error(`\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`);
   }
 
   try {
-    // create treemap data for highcharts version of the treemap
-    writeTreeMapData(fileTree);
-    // create treemap data for foamtree version of the treemap
-    writeFoamTreeData(fileTree);
+    // add the data about all the files to our file tree in the Data directory
+    // since we filtered out the JS files and parsed them, this will include
+    // extra details about any JS files
+    fs.writeFile(
+      `${pathToDir}/CodeMapper/Data/fileTree.js`,
+      `const treeMapData = ${JSON.stringify(fileTree, null, 2)}`,
+      (err) => {
+        if (err) throw err;
+      }
+    );
+    // our original fileTree variable is also modified now to give us what we need for generating other results
+    // so we're going to pass that into generateDependencyData so that we can convert it into the correct type
+    // for treeMap chart, and into writeTreeMapData to give us the things we need for the TreeMap 
+    await Promise.all([
+      writeTreeMapData(fileTree, pathToDir),
+      generateDependencyData(fileTree, [], pathToDir),
+    ]);
   } catch (err) {
     console.error(
-      `\n\x1b[31mError in flow.js with filterAndParse(fileTree): ${err.message}\x1b[37m`,
+      // ** we need to show a user friendly error to the CLI here
+      // but for now, this will do **
+      `\n\x1b[31mError in flow.js with creating visualisation data fileTree): ${err.message}\x1b[37m`
     );
   }
 
-  // our original fileTree should now be modified to give us what we need for generating other results
-  // we're going to pass that into generateDependencyData so that we can convert it into the correct type
-  // for the dependency wheel
-  generateDependencyData(fileTree);
+  // once we've generated all the data and front-end files, we open the "home page" for the person in their browser
+  (async () => {
+    await open(`${pathToDir}/CodeMapper/Visualization/index.html`, {
+      wait: false,
+    });
+  })();
 
+  // ** also, spoiler, this only works half the time, so also let them know to do it manually just in case
   console.log(
-    chalk.greenBright('And we\'re done! To view the results, open the index.html file we\'ve generated in the *** folder in any up-to-date browser.'),
-    // chalk.magenta('Ok! We\'re currently analyzing your codebase using the following settings:'),
+    chalk.greenBright(
+      `And we're done! To view the results, open the index.html file we've generated in the ${pathToDir}/CodeMapper/Visualization folder in any up-to-date browser.`
+    )
   );
-
 }
-// flow();
 
 module.exports = flow;

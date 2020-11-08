@@ -1,8 +1,8 @@
-const generate = require('@babel/generator').default;
-// for dev us if needed since fs can write results to a file for us to look over
-// const fs = require('fs');
-// this file will transform the data from the babel traversing a file into
+/* eslint-disable no-param-reassign */
+// this file transforms the data from the babel traversing a file into
 // a usable structure by giving the visitor useful methods for traversal
+
+const generate = require('@babel/generator').default;
 
 const transform = {};
 
@@ -285,7 +285,6 @@ transform.functionCall = (fileObject, name, type, args) => {
     }
   } catch (err) {
     console.log(`Error while trying to save arguments into filetree. Error is ${err}`);
-    
   }
 
   // and then add it into the file tree
