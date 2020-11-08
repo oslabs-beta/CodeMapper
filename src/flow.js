@@ -1,11 +1,12 @@
 const fs = require('fs');
-const path = require('path');
 const chalk = require('chalk');
 const open = require('open');
+
 const { filterAndParse } = require('./filterAndParse');
 const { generateDependencyData } = require('./build-results/generateDependencyData');
 const { writeTreeMapData } = require('./build-results/generateTreeMapData');
 const generateHTMLfiles = require('./build-results/generateHtmlFiles');
+const modulePath = require('../node-module-path');
 
 async function flow(fileTree, pathToDir) {
   // make container folders for required CodeMapper files so we can put them in a person's project
@@ -20,10 +21,13 @@ async function flow(fileTree, pathToDir) {
   }
 
   // generate html files for the Visualization directory
-  await generateHTMLfiles(
-    path.resolve(process.cwd(), 'visualization'),
-    `${pathToDir}/CodeMapper/Visualization`,
-  );
+  try {
+    const pathToSource = modulePath;
+    const dirPath = `${pathToDir}/CodeMapper/Visualization`;
+    await generateHTMLfiles(pathToSource, dirPath);
+  } catch (e) {
+    console.log('Error while trying to generate the html files: ', e);
+  }
 
   try {
     if (fileTree !== undefined) {
